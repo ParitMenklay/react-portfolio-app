@@ -1,0 +1,105 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+
+@import "tailwindcss";
+
+@theme {
+  /* Base Colors */
+  --color-brown-600: #26231e;
+  --color-brown-500: #43403b;
+  --color-brown-400: #75716b;
+  --color-brown-300: #dad6d1;
+  --color-brown-200: #efeeeb;
+  --color-brown-100: #f9f8f6;
+
+  /* Brand Colors */
+  --color-orange: #f2b88c;
+  --color-green: #12b279;
+  --color-green-light: #d7f2e9;
+  --color-red: #eb5164;
+
+  /* Font Family */
+  --font-poppins: "Poppins", ui-sans-serif, system-ui, sans-serif;
+
+  /* Font Sizes */
+  --font-size-h1: 52px;
+  --font-size-h2: 40px;
+  --font-size-h3: 24px;
+  --font-size-h4: 20px;
+  --font-size-body-1: 16px;
+  --font-size-body-2: 14px;
+  --font-size-body-3: 12px;
+
+  /* Font Weights */
+  --font-weight-bold: 700;
+  --font-weight-semibold: 600;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --font-weight-light: 300;
+
+  /* Line Heights */
+  --line-height-h1: 60px;
+  --line-height-h2: 48px;
+  --line-height-h3: 32px;
+  --line-height-h4: 28px;
+  --line-height-body-1: 24px;
+  --line-height-body-2: 22px;
+  --line-height-body-3: 20px;
+}
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: var(--font-poppins);
+    background-color: var(--color-brown-100);
+    color: #1a1a2c;
+    @apply antialiased;
+  }
+
+  /* Typography */
+  h1 {
+    font-size: var(--font-size-h1);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-h1);
+  }
+
+  h2 {
+    font-size: var(--font-size-h2);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-h2);
+  }
+
+  h3 {
+    font-size: var(--font-size-h3);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-h3);
+  }
+
+  h4 {
+    font-size: var(--font-size-h4);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-h4);
+  }
+  .body-1 {
+    font-size: var(--font-size-body-1);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-body-1);
+  }
+
+  .body-2 {
+    font-size: var(--font-size-body-2);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-body-2);
+  }
+
+  .body-3 {
+    font-size: var(--font-size-body-3);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-body-3);
+  }
+}
+
