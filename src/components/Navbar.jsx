@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import logo from "../assets/images/logo.png";
-import { Menu } from "lucide-react";
+import { Menu, Github, Linkedin, Mail } from "lucide-react";
 
 import {
   NavigationMenu,
@@ -11,7 +11,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 
-function Navbar() {
+export function Navbar() {
   const [open, setOpen] = useState(false);
 
   // ปิด popup เมื่อ resize เป็น desktop (>= sm)
@@ -108,4 +108,18 @@ function Navbar() {
   );
 }
 
-export default Navbar;
+export function Footer() {
+  return (
+    <>
+      <footer className="bg-brown-200 flex flex-col md:flex-row justify-center md:justify-between items-center w-full h-[152px] md:h-[144px] px-4 md:px-32 py-10 md:py-16 gap-6">
+        <div className="flex flex-row justify-center gap-6">
+          <span className="body-1 text-brown-500">Get in touch</span>
+          <Github />
+          <Linkedin />
+          <Mail />
+        </div>
+        <Button variant="link"><span className="body-1 text-brown-600">Home Page</span></Button>
+      </footer>
+    </>
+  );
+}
