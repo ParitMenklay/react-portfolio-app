@@ -1,4 +1,4 @@
-import Navbar from "./components/Navbar";
+import {Navbar,Footer} from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
 export default function App() {
 
@@ -7,6 +7,7 @@ export default function App() {
    <>
    <Navbar></Navbar>
    <HeroSection></HeroSection>
+   <Footer></Footer>
    </>
   );
 }

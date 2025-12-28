@@ -2,10 +2,10 @@ import Image_HeroSection from "../assets/images/img_herosection.jpg";
 function HeroSection() {
   return (
     <>
-      <section className="bg-brown-100 flex w-full h-auto flex-col items-center px-4 py-10 gap-10 sm:flex-row sm:justify-center  sm:gap-[60px]">
-        <div className="flex flex-col justify-center items-center text-center gap-4 w-[343px] h-[184px] sm:text-end sm:gap-6 sm:w-[347px] sm:h-[276px]">
-          <h1 className="hidden sm:flex">Stay Informed, Stay Inspired</h1>
-          <h2 className="sm:hidden">Stay Informed, Stay Inspired</h2>
+      <section className="bg-brown-100 flex w-full h-auto flex-col items-center px-4 py-10 gap-10 lg:flex-row lg:justify-center  lg:gap-[60px]">
+        <div className="flex flex-col justify-center items-center text-center gap-4 w-[343px] h-[184px] lg:text-end lg:gap-6 lg:w-[347px] lg:h-[276px]">
+          <h1 className="hidden lg:flex">Stay Informed, Stay Inspired</h1>
+          <h2 className="lg:hidden">Stay Informed, Stay Inspired</h2>
           <span className="body-1 text-brown-400">
             Discover a World of Knowledge at Your Fingertips. Your Daily Dose of
             Inspiration and Information.
@@ -13,8 +13,8 @@ function HeroSection() {
         </div>
         <div
           className="
-    w-[343px] sm:w-[386px]
-    h-[470px] sm:h-[529px]
+    w-[343px] lg:w-[386px]
+    h-[470px] lg:h-[529px]
     rounded-4xl
     overflow-hidden
     bg-[linear-gradient(0deg,#FFFFFF,#FFFFFF),linear-gradient(0deg,rgba(190,187,177,0.25),rgba(190,187,177,0.25))]
