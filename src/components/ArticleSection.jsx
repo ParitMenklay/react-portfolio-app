@@ -15,10 +15,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import BlogCard from "./BlogCard";
+import { blogPosts } from "../data/blogPosts";
 function ArticleSection() {
   return (
     <>
-      <section className="flex flex-col h-[350px] md:px-32 md:py-20">
+      <section className="flex flex-col h-[236px] md:px-32 md:py-20">
         <h3 className="p-4 gap-2.5">Latest articles</h3>
         <div className="flex flex-col md:flex-row md:justify-between md:items-center bg-brown-200 p-4 h-auto md:h-20 gap-4 md:rounded-xl">
           <div className="hidden md:flex ">
@@ -68,22 +70,50 @@ function ArticleSection() {
           </div>
           <div className="md:hidden flex flex-col gap-1">
             <Label className="body-1 text-brown-400">Category</Label>
-            <Select>
-              <SelectTrigger className="w-full h-12! bg-white">
-                <SelectValue className="body-1! text-brown-400!" />
+            <Select defaultValue="Highlight">
+              <SelectTrigger className="w-full h-12! bg-white body-1 text-brown-400">
+                <SelectValue className="body-1 text-brown-400" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper" sideOffset={0}>
                 <SelectGroup>
-                  <SelectItem value="Highlight">Highlight</SelectItem>
-                  <SelectItem value="Cat">Cat</SelectItem>
-                  <SelectItem value="Inspiration">Inspiration</SelectItem>
-                  <SelectItem value="General">General</SelectItem>
+                  <SelectItem
+                    value="Highlight"
+                    className="body-1 text-brown-400"
+                  >
+                    Highlight
+                  </SelectItem>
+                  <SelectItem value="Cat" className="body-1 text-brown-400">
+                    Cat
+                  </SelectItem>
+                  <SelectItem
+                    value="Inspiration"
+                    className="body-1 text-brown-400"
+                  >
+                    Inspiration
+                  </SelectItem>
+                  <SelectItem value="General" className="body-1 text-brown-400">
+                    General
+                  </SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
           </div>
         </div>
       </section>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:pt-14 md:px-28 md:pb-28">
+          {blogPosts.slice(0, 6).map((post) => (
+            <BlogCard
+              key={post.id}
+              image={post.image}
+              category={post.category}
+              title={post.title}
+              description={post.description}
+              author={post.author}
+              authorImage={post.authorImage}
+              date={post.date}
+            />
+          ))}
+        </div>
     </>
   );
 }
