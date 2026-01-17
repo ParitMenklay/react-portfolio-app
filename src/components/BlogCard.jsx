@@ -19,7 +19,7 @@ function BlogCard(props) {
             {props.title}
           </h4>
         </a>
-        <p className="body-2 text-brown-400 mb-4 flex-grow line-clamp-3">
+        <p className="body-2 text-brown-400 mb-4 grow line-clamp-3">
           {props.description}
         </p>
         <div className="flex items-center text-sm">

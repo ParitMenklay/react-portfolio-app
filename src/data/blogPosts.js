@@ -83,4 +83,88 @@ export const blogPosts = [
       content:
         "## 1. Understanding Feline Nutritional Needs\n\nExplore the unique dietary requirements of cats as obligate carnivores.\n\n## 2. Choosing the Right Cat Food\n\nLearn how to read cat food labels and select high-quality options for your pet.\n\n## 3. Wet vs. Dry Food\n\nUnderstand the pros and cons of wet and dry cat food and how to incorporate both into your cat's diet.\n\n## 4. Portion Control and Feeding Schedule\n\nDiscover how to determine the right portion sizes and establish a healthy feeding routine.\n\n## 5. Special Dietary Considerations\n\nLearn about nutrition for cats with specific health conditions or at different life stages.",
     },
+    {
+      id: 7,
+      image:
+        "https://res.cloudinary.com/dcbpjtd1r/image/upload/v1728449771/my-blog-post/e739huvlalbfz9eynysc.jpg",
+      category: "General",
+      title: "Sustainable Living: Practical Steps for an Eco-Friendly Lifestyle",
+      description:
+        "Discover simple yet effective ways to reduce your environmental footprint and live more sustainably in today's world.",
+      author: "Thompson P.",
+      date: "15 October 2024",
+      likes: 278,
+      content:
+        "## 1. Understanding Sustainability\n\nLearn what sustainability means and why it's crucial for the future of our planet.\n\n## 2. Reducing Energy Consumption\n\nExplore practical tips for lowering your energy use at home and reducing your carbon footprint.\n\n## 3. Waste Reduction Strategies\n\nDiscover effective methods for minimizing waste, from composting to choosing reusable products.\n\n## 4. Sustainable Food Choices\n\nLearn how your food decisions impact the environment and how to make more sustainable choices.\n\n## 5. Building Sustainable Habits\n\nUnderstand how to incorporate sustainable practices into your daily routine for long-term impact.",
+    },
+    {
+      id: 8,
+      image:
+        "https://res.cloudinary.com/dcbpjtd1r/image/upload/v1728449771/my-blog-post/gsutzgam24abrvgee9r4.jpg",
+      category: "Cat",
+      title: "Creating the Perfect Home Environment for Your Cat",
+      description:
+        "Learn how to design a cat-friendly space that promotes your feline's well-being, happiness, and natural behaviors.",
+      author: "Thompson P.",
+      date: "8 November 2024",
+      likes: 442,
+      content:
+        "## 1. Understanding Cat Needs\n\nExplore the essential elements that make a home environment ideal for cats.\n\n## 2. Vertical Space and Climbing\n\nLearn why vertical space is crucial for cats and how to incorporate climbing structures.\n\n## 3. Cozy Resting Areas\n\nDiscover how to create comfortable and safe resting spots throughout your home.\n\n## 4. Play and Enrichment Zones\n\nUnderstand the importance of play areas and how to keep your cat mentally stimulated.\n\n## 5. Safety Considerations\n\nLearn about potential hazards in the home and how to create a safe environment for your cat.",
+    },
+    {
+      id: 9,
+      image:
+        "https://res.cloudinary.com/dcbpjtd1r/image/upload/v1728449771/my-blog-post/zzye4nxfm3pmh81z7hni.jpg",
+      category: "Inspiration",
+      title: "Building Confidence: Your Path to Self-Assurance",
+      description:
+        "Unlock the secrets to developing unshakeable confidence and learn how to project self-assurance in every situation.",
+      author: "Thompson P.",
+      date: "2 December 2024",
+      likes: 389,
+      content:
+        "## 1. Understanding Confidence\n\nExplore what confidence truly means and how it differs from arrogance or insecurity.\n\n## 2. Overcoming Self-Doubt\n\nLearn techniques to challenge negative self-talk and build a more positive self-image.\n\n## 3. Building Competence\n\nDiscover how developing skills and knowledge in your areas of interest builds genuine confidence.\n\n## 4. Body Language and Presence\n\nUnderstand how posture, eye contact, and body language can enhance your confidence.\n\n## 5. Maintaining Confidence\n\nLearn strategies to sustain confidence through challenges and setbacks.",
+    },
+    {
+      id: 10,
+      image:
+      "https://res.cloudinary.com/dcbpjtd1r/image/upload/v1728449771/my-blog-post/e0haxst38li4g8i0vpsr.jpg",
+      category: "General",
+      title: "The Science of Sleep: Optimizing Your Rest for Better Health",
+      description:
+        "Explore the fascinating world of sleep science and learn how quality rest can transform your physical and mental well-being.",
+      author: "Thompson P.",
+      date: "18 January 2024",
+      likes: 267,
+      content:
+        "## 1. Understanding Sleep Cycles\n\nLearn about the different stages of sleep and why each is essential for your health.\n\n## 2. The Impact of Sleep on Health\n\nDiscover how sleep affects your immune system, cognitive function, and overall well-being.\n\n## 3. Creating the Perfect Sleep Environment\n\nExplore how to optimize your bedroom for the best possible sleep quality.\n\n## 4. Sleep Hygiene Practices\n\nLearn proven strategies for developing healthy sleep habits and routines.\n\n## 5. Addressing Sleep Challenges\n\nUnderstand common sleep problems and discover effective solutions for better rest.",
+    },
+    {
+      id: 11,
+      image:
+        "https://res.cloudinary.com/dcbpjtd1r/image/upload/v1728449771/my-blog-post/g8qpepvgnz6gioylyhrz.jpg",
+      category: "Cat",
+      title: "Understanding Cat Behavior: Why Cats Do What They Do",
+      description:
+        "Delve into the fascinating world of feline psychology and gain insights into your cat's unique behaviors and motivations.",
+      author: "Thompson P.",
+      date: "14 February 2024",
+      likes: 623,
+      content:
+        "## 1. Natural Instincts and Behaviors\n\nExplore the instinctual behaviors that cats exhibit and their evolutionary origins.\n\n## 2. Play Behavior\n\nUnderstand why cats play, what different play behaviors mean, and how to engage with them.\n\n## 3. Territorial Behaviors\n\nLearn about how cats establish and defend their territory in domestic settings.\n\n## 4. Social Behaviors\n\nDiscover how cats communicate and interact with other cats and humans.\n\n## 5. Behavioral Problems and Solutions\n\nUnderstand common behavioral issues and learn effective strategies for addressing them.",
+    },
+    {
+      id: 12,
+      image:
+        "https://res.cloudinary.com/dcbpjtd1r/image/upload/v1728449771/my-blog-post/koydfh6jpmzhtxvwein3.jpg",
+      category: "Inspiration",
+      title: "The Art of Gratitude: Transforming Your Perspective",
+      description:
+        "Discover how practicing gratitude can shift your mindset, improve your mental health, and enhance your overall quality of life.",
+      author: "Thompson P.",
+      date: "9 April 2024",
+      likes: 451,
+      content:
+        "## 1. Understanding Gratitude\n\nExplore what gratitude truly means and how it differs from simple appreciation.\n\n## 2. The Science of Gratitude\n\nLearn about research-backed benefits of gratitude practice on mental and physical health.\n\n## 3. Daily Gratitude Practices\n\nDiscover practical exercises and techniques for incorporating gratitude into your daily life.\n\n## 4. Gratitude in Challenging Times\n\nUnderstand how to find gratitude even during difficult periods and setbacks.\n\n## 5. Cultivating a Grateful Mindset\n\nLearn how to develop a lasting attitude of gratitude that transforms your perspective on life.",
+    },
   ];
