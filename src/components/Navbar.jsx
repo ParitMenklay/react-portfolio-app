@@ -1,5 +1,6 @@
 import logo from "../assets/images/logo.png";
 import { Menu, Github, Linkedin, Mail } from "lucide-react";
+import { Link } from "react-router-dom";
 
 // Import Dropdown Menu จาก Shadcn
 import {
@@ -78,6 +79,13 @@ export function Navbar() {
 }
 
 export function Footer() {
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth", // "smooth" สำหรับการเลื่อนแบบนุ่มนวล หรือ "instant" เพื่อให้ไปทันที
+    });
+  };
   return (
     <footer className="bg-brown-200 border-t border-brown-300 flex flex-col md:flex-row justify-center md:justify-between items-center w-full h-auto px-4 md:px-32 py-10 md:py-16 gap-6">
       {/* Social Icons Section */}
@@ -98,12 +106,13 @@ export function Footer() {
 
       {/* Home Page Link */}
       <Button variant="link" asChild className="p-0 h-auto">
-        <a
-          href="/"
+        <Link
+          to="/"
+          onClick={scrollToTop}
           className="text-sm font-semibold text-brown-600 hover:text-brown-800 transition-colors underline-offset-4 hover:underline"
         >
           Home Page
-        </a>
+        </Link>
       </Button>
     </footer>
   );
