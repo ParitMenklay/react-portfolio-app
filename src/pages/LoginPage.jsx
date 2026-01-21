@@ -1,0 +1,178 @@
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom"; // 1. นำเข้า useNavigate
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Eye, EyeOff, X } from "lucide-react";
+import { toast } from "sonner";
+
+const MOCK_USER = {
+  email: "moodeng.cute@gmail.com",
+  password: "password123",
+};
+
+function LoginPage() {
+  const navigate = useNavigate(); // 2. เรียกใช้งาน hook
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const validateForm = () => {
+    let newErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (validateForm()) {
+      if (
+        formData.email === MOCK_USER.email &&
+        formData.password === MOCK_USER.password
+      ) {
+        // บันทึกข้อมูลจำลองลง localStorage
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            email: MOCK_USER.email,
+            name: "Moodeng ja", // ชื่อตามรูป Landing Page
+          })
+        );
+
+        navigate("/");
+        window.location.reload();
+      } else {
+        toast.custom(
+          (t) => (
+            <div className="bg-red text-white p-4 rounded-lg shadow-lg flex justify-between items-start w-[350px] md:w-[450px]">
+              <div className="flex flex-col gap-1">
+                <p className="font-bold body-1">
+                  Your password is incorrect or this email doesn't exist
+                </p>
+                <p className="body-3 opacity-90">
+                  Please try another password or email
+                </p>
+              </div>
+              <button
+                onClick={() => toast.dismiss(t)}
+                className="cursor-pointer hover:opacity-70"
+              >
+                <X size={20} />
+              </button>
+            </div>
+          ),
+          {
+            duration: 4000,
+            position: "bottom-right",
+          }
+        );
+      }
+    }
+  };
+
+  return (
+    <div className="min-h-screen w-full bg-brown-100 flex items-center justify-center p-4 font-poppins">
+      <div className="bg-brown-200 w-full max-w-[480px] p-10 rounded-[40px] flex flex-col items-center shadow-sm border border-brown-300">
+        <div className="text-center mb-10">
+          <h1 className="text-brown-600 font-semibold">Log in</h1>
+        </div>
+
+        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-5">
+          <div className="flex flex-col gap-1.5 text-left w-full">
+            <Label className="body-2 text-brown-500 ml-1">Email</Label>
+            <Input
+              type="text"
+              name="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              className={`h-[56px] bg-white border-none rounded-xl px-4 body-1 shadow-sm transition-all focus-visible:ring-1 ${
+                errors.email
+                  ? "ring-1 ring-red text-red"
+                  : "focus-visible:ring-brown-300"
+              }`}
+            />
+            {errors.email && (
+              <span className="text-red body-3 ml-1 animate-in fade-in">
+                {errors.email}
+              </span>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-1.5 text-left w-full">
+            <Label className="body-2 text-brown-500 ml-1">Password</Label>
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleChange}
+                className={`h-[56px] bg-white border-none rounded-xl px-4 pr-12 body-1 shadow-sm transition-all focus-visible:ring-1 ${
+                  errors.password
+                    ? "ring-1 ring-red text-red"
+                    : "focus-visible:ring-brown-300"
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-brown-400 hover:text-brown-600 transition-colors cursor-pointer"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+            {errors.password && (
+              <span className="text-red body-3 ml-1">{errors.password}</span>
+            )}
+          </div>
+
+          <div className="flex justify-center mt-6">
+            <Button
+              type="submit"
+              className="w-[180px] h-[56px] bg-brown-600 hover:bg-brown-500 text-white body-1 rounded-full font-bold shadow-lg transition-all active:scale-95 cursor-pointer"
+            >
+              Log in
+            </Button>
+          </div>
+        </form>
+
+        <div className="mt-12 flex items-center gap-2 body-2 text-brown-400">
+          <span>Don’t have any account?</span>
+          <Link
+            to="/signup"
+            className="text-brown-600 font-bold underline underline-offset-4 hover:opacity-70 cursor-pointer"
+          >
+            Sign up
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default LoginPage;

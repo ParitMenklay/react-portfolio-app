@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { Spinner } from "@/components/ui/spinner";
 import { formatDate } from "../utils/formatDate";
@@ -21,9 +21,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-// Reusable Author Card
+// --- Reusable Author Card ---
 const AuthorCard = ({ post }) => (
-  <div className="bg-brown-200 rounded-3xl p-6 lg:p-8 flex flex-col gap-4 border ">
+  <div className="bg-brown-200 rounded-3xl p-6 lg:p-8 flex flex-col gap-4 border border-brown-300">
     <div className="flex items-center gap-4">
       <img
         className="w-12 h-12 lg:w-16 lg:h-16 rounded-full object-cover border-2 border-white shadow-sm"
@@ -34,11 +34,11 @@ const AuthorCard = ({ post }) => (
         <span className="body-3 text-brown-400 uppercase tracking-widest">
           Author
         </span>
-        <h4 className=" text-brown-500">{post?.author}</h4>
+        <h4 className="text-brown-500 font-bold text-lg">{post?.author}</h4>
       </div>
     </div>
     <hr className="border-brown-300" />
-    <p className="text-brown-400 body-1 leading-relaxed  lg:text-base italic">
+    <p className="text-brown-400 body-1 leading-relaxed italic">
       I am a pet enthusiast and freelance writer who specializes in animal
       behavior and care. With a deep love for cats, I enjoy sharing insights on
       feline companionship and wellness.
@@ -48,12 +48,20 @@ const AuthorCard = ({ post }) => (
 
 function ViewPostPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
+
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [comment, setComment] = useState("");
 
-  const isLoggedIn = false;
-
+  
   useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+
     const fetchPost = async () => {
       try {
         const response = await axios.get(
@@ -62,14 +70,19 @@ function ViewPostPage() {
         setPost(response.data);
       } catch (error) {
         console.error("Error fetching post:", error);
+        toast.error("Failed to load post");
       } finally {
         setLoading(false);
       }
     };
+
     fetchPost();
     window.scrollTo(0, 0);
   }, [id]);
 
+  const isLoggedIn = !!user;
+
+  
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href).then(() => {
       toast.custom(
@@ -83,7 +96,7 @@ function ViewPostPage() {
             </div>
             <button
               onClick={() => toast.dismiss(t)}
-              className="text-white/80 hover:text-white"
+              className="text-white/80 hover:text-white cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -94,11 +107,12 @@ function ViewPostPage() {
     });
   };
 
+  
   if (loading)
     return (
       <div className="flex flex-col items-center justify-center py-40 gap-4">
-        <Spinner className="h-12 w-12 text-[#433E3F]" />
-        <p className="text-gray-400 animate-pulse font-medium">
+        <Spinner className="h-12 w-12 text-brown-600" />
+        <p className="text-brown-400 animate-pulse font-medium body-1">
           Loading article...
         </p>
       </div>
@@ -106,46 +120,45 @@ function ViewPostPage() {
 
   if (!post)
     return (
-      <div className="text-center py-20 font-bold text-xl">Post not found.</div>
+      <div className="text-center py-40 font-bold text-xl text-brown-600">
+        Post not found.
+      </div>
     );
 
+  // --- Alert Dialog Component สำหรับคนยังไม่ Login ---
   const LoginRequiredAlert = ({ children }) => (
     <AlertDialog>
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
-      <AlertDialogContent className="bg-brown-100 rounded-[32px] border-none p-10 w-[343px] lg:w-[621px] h-[272px] lg:h-[352px]">
-        {/* ปุ่มกากบาท (X) สำหรับปิดที่มุมขวาบน */}
+      <AlertDialogContent className="bg-brown-100 rounded-[32px] border-none p-10 w-[90%] max-w-[621px] flex flex-col items-center">
         <AlertDialogCancel className="absolute right-6 top-6 border-none bg-transparent hover:bg-transparent p-0 w-auto h-auto cursor-pointer">
-          <X className="h-6 w-6 text-gray-400" />
+          <X className="h-6 w-6 text-brown-400" />
         </AlertDialogCancel>
 
         <AlertDialogHeader className="flex flex-col items-center gap-4">
           <AlertDialogTitle className="text-brown-600 text-2xl lg:text-[40px] font-bold text-center leading-tight">
             Create an account to continue
           </AlertDialogTitle>
-
-          {/* ซ่อน Description เดิมไว้เพื่อความถูกต้องของโครงสร้าง Accessibility แต่ไม่ให้แสดงผล (เพราะในรูปไม่มี) */}
           <AlertDialogDescription className="sr-only">
             Please create an account or login to proceed.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="flex flex-col items-center gap-6 mt-4">
-          {/* ปุ่มหลัก: Create account */}
-          <AlertDialogAction className="w-full rounded-full bg-brown-600 hover:bg-[#1A1A1A] text-white body-1 h-14  transition-colors cursor-pointer">
+        <div className="flex flex-col items-center gap-6 mt-8 w-full">
+          <AlertDialogAction
+            className="w-full rounded-full bg-brown-600 hover:opacity-90 text-white body-1 h-14 transition-all cursor-pointer shadow-md"
+            onClick={() => navigate("/signup")}
+          >
             Create account
           </AlertDialogAction>
 
-          {/* ข้อความด้านล่าง: Already have an account? Log in */}
           <div className="flex items-center gap-2">
             <span className="text-brown-400 body-1">
               Already have an account?
             </span>
             <Button
               variant="link"
-              onClick={() => {
-                /* ลอจิกไปหน้า Login */
-              }}
-              className="text-brown-600 body-1 underline underline-offset-4 cursor-pointer"
+              onClick={() => navigate("/login")}
+              className="text-brown-600 body-1 underline underline-offset-4 cursor-pointer p-0 h-auto font-bold"
             >
               Log in
             </Button>
@@ -156,23 +169,23 @@ function ViewPostPage() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto p-4 lg:p-10 flex flex-col gap-6 lg:gap-10">
+    <div className="max-w-7xl mx-auto p-4 lg:p-10 flex flex-col gap-6 lg:gap-10 font-poppins">
       {/* 1. Main Featured Image */}
       <img
         src={post.image}
-        className="w-full h-56 sm:h-72 lg:h-[500px] object-cover rounded-3xl shadow-sm"
+        className="w-full h-56 sm:h-72 lg:h-[500px] object-cover rounded-[32px] shadow-sm"
         alt={post.title}
       />
 
-      {/* 2. Content Wrapper (Switches to Row at 'lg' breakpoint) */}
+      {/* 2. Content Wrapper */}
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
         {/* Left Side: Main Content */}
         <div className="flex-1 flex flex-col gap-6 w-full">
           <div className="flex items-center gap-2">
-            <span className="bg-green-light rounded-full px-3 py-1 body-2 text-green">
+            <span className="bg-green-100 rounded-full px-3 py-1 body-2 text-green font-semibold">
               {post.category}
             </span>
-            <span className="text-gray-300">|</span>
+            <span className="text-brown-200">|</span>
             <span className="body-1 text-brown-400">
               {formatDate(post.date)}
             </span>
@@ -182,21 +195,21 @@ function ViewPostPage() {
             {post.title}
           </h1>
 
-          <p className="text-lg lg:text-xl text-brown-500 leading-relaxed italic border-l-4 border-brown-200 pl-4">
+          <p className="text-lg lg:text-xl text-brown-500 leading-relaxed italic border-l-4 border-brown-300 pl-4">
             {post.description}
           </p>
 
-          <div className="markdown prose prose-sm lg:prose-base prose-stone max-w-none text-[#433E3F] leading-relaxed">
+          <div className="markdown prose prose-stone max-w-none text-brown-600 leading-relaxed body-1">
             <ReactMarkdown>{post.content}</ReactMarkdown>
           </div>
 
-          {/* Author Card for Mobile/Tablet (Visible until 'lg') */}
+          {/* Author Card for Mobile */}
           <div className="lg:hidden mt-4">
             <AuthorCard post={post} />
           </div>
 
           {/* Interaction Box (Like/Share/Copy) */}
-          <div className="bg-brown-100 flex flex-col w-full rounded-3xl p-6 md:p-10 gap-6 border border-brown-200 mt-8 shadow-sm">
+          <div className="bg-brown-100 flex flex-col w-full rounded-[32px] p-6 md:p-10 gap-6 border border-brown-200 mt-8 shadow-sm">
             <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 md:gap-6">
               <div className="w-full md:w-auto md:shrink-0">
                 {!isLoggedIn ? (
@@ -205,21 +218,22 @@ function ViewPostPage() {
                       variant="outline"
                       className="w-full md:w-28 h-12 px-8 rounded-full bg-white border-brown-300 text-brown-600 font-bold flex items-center justify-center gap-2 hover:bg-brown-50 cursor-pointer transition-all active:scale-95"
                     >
-                      <Smile className="w-6 h-6 text-brown-400" /> {post.likes}
+                      <Smile className="w-6 h-6 text-brown-400" />{" "}
+                      {post.likes || 0}
                     </Button>
                   </LoginRequiredAlert>
                 ) : (
                   <Button
                     variant="outline"
-                    className="w-full md:w-auto h-14 px-8 rounded-full bg-white border-brown-300 text-brown-600 font-bold flex items-center justify-center gap-2 cursor-pointer hover:bg-brown-50 transition-all active:scale-[0.98]"
+                    className="w-full md:w-auto h-12 px-8 rounded-full bg-white border-brown-300 text-brown-600 font-bold flex items-center justify-center gap-2 cursor-pointer hover:bg-brown-50 transition-all active:scale-95"
                   >
-                    <Smile className="w-6 h-6" /> {post.likes}
+                    <Smile className="w-6 h-6 text-brown-500" />{" "}
+                    {post.likes || 0}
                   </Button>
                 )}
               </div>
 
               <div className="flex flex-col md:flex-row items-center justify-end md:flex-1 gap-4">
-                {/* ปุ่ม Copy Link */}
                 <Button
                   variant="outline"
                   className="w-full md:w-auto h-12 px-8 rounded-full bg-white border-brown-300 text-brown-600 font-bold flex items-center justify-center gap-2 hover:bg-brown-50 cursor-pointer transition-all active:scale-95 shadow-sm"
@@ -257,30 +271,74 @@ function ViewPostPage() {
           <div className="grid w-full gap-4 mt-8">
             <Label
               htmlFor="message"
-              className="text-xl font-bold text-[#433E3F]"
+              className="text-xl font-bold text-brown-600"
             >
               Comment
             </Label>
             <Textarea
               placeholder="What are your thoughts?"
               id="message"
-              className="min-h-[150px] rounded-2xl border-gray-200 focus:ring-1 focus:ring-gray-300 p-4"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              className="min-h-[150px] rounded-2xl border-brown-200 focus:ring-1 focus:ring-brown-300 p-4 body-1 text-brown-600"
             />
             <div className="justify-self-end">
               {!isLoggedIn ? (
-                // ถ้าไม่ได้ Login ให้แสดง Modal แจ้งเตือน
                 <LoginRequiredAlert>
-                  <Button className="h-12 w-32 rounded-full bg-[#433E3F] hover:bg-[#2D2A2A] text-white font-bold shadow-lg transition-all active:scale-95 cursor-pointer">
+                  <Button className="h-12 w-32 rounded-full bg-brown-600 hover:opacity-90 text-white font-bold shadow-lg transition-all active:scale-95 cursor-pointer">
                     Send
                   </Button>
                 </LoginRequiredAlert>
               ) : (
-                // ถ้า Login แล้ว ให้ทำงานตามปกติ (เช่น เรียกฟังก์ชันส่งคอมเมนต์)
                 <Button
                   onClick={() => {
-                    /* ลอจิกการส่งคอมเมนต์ของคุณ */
+                    
+                    if (!comment.trim()) {
+                      return toast.custom(
+                        (t) => (
+                          <div className="bg-red text-white p-5 rounded-2xl shadow-lg flex justify-between items-start w-full max-w-[350px] relative font-poppins">
+                            <div className="flex flex-col gap-1">
+                              <h3 className="text-xl font-bold">Error!</h3>
+                              <p className="text-white/90 text-sm">
+                                Please write something before sending.
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => toast.dismiss(t)}
+                              className="text-white/80 hover:text-white cursor-pointer"
+                            >
+                              <X className="w-5 h-5" />
+                            </button>
+                          </div>
+                        ),
+                        { duration: 3000 }
+                      );
+                    }
+
+                   
+                    toast.custom(
+                      (t) => (
+                        <div className="bg-green text-white p-5 rounded-2xl shadow-lg flex justify-between items-start w-full max-w-[350px] relative font-poppins">
+                          <div className="flex flex-col gap-1">
+                            <h3 className="text-xl font-bold">Success!</h3>
+                            <p className="text-white/90 text-sm">
+                              Your comment has been sent successfully.
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => toast.dismiss(t)}
+                            className="text-white/80 hover:text-white cursor-pointer"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      ),
+                      { duration: 3000 }
+                    );
+
+                    setComment(""); 
                   }}
-                  className="h-12 w-32 rounded-full bg-[#433E3F] hover:bg-[#2D2A2A] text-white font-bold shadow-lg transition-all active:scale-95 cursor-pointer"
+                  className="h-12 w-32 rounded-full bg-brown-600 hover:opacity-90 text-white font-bold shadow-lg transition-all active:scale-95 cursor-pointer"
                 >
                   Send
                 </Button>
@@ -289,9 +347,9 @@ function ViewPostPage() {
           </div>
         </div>
 
-        {/* Right Side: Desktop Sidebar (Sticky from 'lg' breakpoint) */}
+        {/* Right Side: Desktop Sidebar (Sticky) */}
         <div className="hidden lg:block lg:w-[400px]">
-          <div className="sticky top-10">
+          <div className="sticky top-24">
             <AuthorCard post={post} />
           </div>
         </div>
