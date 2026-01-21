@@ -6,6 +6,8 @@ import { Toaster } from "@/components/ui/sonner"
 import NotFoundPage from "./pages/NotFoundPage";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
+import ProfilePage from "./pages/ProfilePage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 // 1. สร้าง Layout สำหรับหน้าที่ "มี" Navbar/Footer
 const MainLayout = () => (
@@ -21,6 +23,7 @@ const MainLayout = () => (
 // 2. สร้าง Layout สำหรับหน้าที่ "ไม่มี" Navbar/Footer (เช่น หน้า Auth)
 const AuthLayout = () => (
   <main className="min-h-screen">
+    <Navbar />
     <Outlet /> {/* ตรงนี้คือจุดที่เนื้อหาของ SignUpPage จะมาแสดง */}
   </main>
 );
@@ -46,7 +49,8 @@ export default function App() {
         <Route element={<AuthLayout />}>
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
-          {/* <Route path="/forgot-password" element={<ForgotPassword />} /> */}
+          <Route path="/profile" element={<ProfilePage/>}/>
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
         </Route>
 
         {/* หน้า 404 */}
