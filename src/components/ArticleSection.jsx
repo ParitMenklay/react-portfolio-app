@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Search } from "lucide-react";
+import axios from "axios";
 import {
   InputGroup,
   InputGroupAddon,
@@ -11,65 +12,132 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import BlogCard from "./BlogCard";
-import { blogPosts } from "../data/blogPosts";
+import { Spinner } from "@/components/ui/spinner";
+import { Link } from "react-router-dom";
 
 function ArticleSection() {
   const categories = ["All", "Highlight", "Cat", "Inspiration", "General"];
 
+  // --- States ---
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchText, setSearchText] = useState("");
-  const [visibleCount, setVisibleCount] = useState(6);
+  const [blogPosts, setBlogPosts] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [isMoreLoading, setIsMoreLoading] = useState(false);
 
+  // --- Dropdown Logic ---
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchRef = useRef(null);
+
+  // --- Data Fetching ---
+  const fetchData = async (currentPage, isNewSearch = false) => {
+    if (isNewSearch) {
+      setLoading(true);
+    } else {
+      setIsMoreLoading(true);
+    }
+
+    try {
+      const categoryParam = selectedCategory === "All" ? "" : selectedCategory;
+      const response = await axios.get(
+        `https://blog-post-project-api.vercel.app/posts`,
+        {
+          params: {
+            page: currentPage,
+            limit: 6,
+            category: categoryParam,
+            keyword: searchText,
+          },
+        }
+      );
+
+      const newPosts = response.data.posts;
+
+      if (isNewSearch) {
+        setBlogPosts(newPosts);
+        // เปิด dropdown เฉพาะเมื่อมีการพิมพ์ค้นหา
+        if (searchText.trim().length > 0) {
+          setShowDropdown(true);
+        }
+      } else {
+        setBlogPosts((prev) => [...prev, ...newPosts]);
+      }
+
+      // ตรวจสอบว่ามีหน้าต่อไปไหม
+      setHasMore(response.data.currentPage < response.data.totalPages);
+    } catch (error) {
+      console.error("Fetch Error:", error);
+    } finally {
+      setLoading(false);
+      setIsMoreLoading(false);
+    }
+  };
+
+  // 1. จัดการการค้นหาและเปลี่ยนหมวดหมู่ (Reset ไปหน้า 1 เสมอ)
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      setPage(1);
+      fetchData(1, true);
+    }, 200); // 400ms กำลังดีสำหรับการพิมพ์
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [selectedCategory, searchText]);
+
+  // 2. จัดการเมื่อกด "View More" (โหลดหน้าถัดไป)
+  useEffect(() => {
+    if (page > 1) {
+      fetchData(page, false);
+    }
+  }, [page]);
+
+  // 3. ปิด Dropdown เมื่อคลิกนอกพื้นที่ช่องค้นหา
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // --- Handlers ---
   const handleCategoryChange = (value) => {
     setSelectedCategory(value);
-    setVisibleCount(6);
+    setSearchText("");
+    setShowDropdown(false);
   };
 
-  const handleSearchChange = (e) => {
-    setSearchText(e.target.value);
-    setVisibleCount(6);
-  };
-
-  const filteredPosts = blogPosts.filter((post) => {
-    const isCategoryMatch =
-      selectedCategory === "All" || post.category === selectedCategory;
-      const isSearchMatch = 
-      post.title.toLowerCase().includes(searchText.toLowerCase()) || 
-      post.description.toLowerCase().includes(searchText.toLowerCase()) || 
-      post.author.toLowerCase().includes(searchText.toLowerCase()); 
-
-    return isCategoryMatch && isSearchMatch;
-  });
-
-  const handleViewMore = () => {
-    setVisibleCount((prev) => prev + 6);
+  const handleLoadMore = () => {
+    setPage((prev) => prev + 1);
   };
 
   return (
-    <>
+    <div className="w-full">
       <section className="flex flex-col h-auto md:px-32 md:py-20">
-        <h3 className="p-4 gap-2.5">Latest articles</h3>
-        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center bg-brown-200 p-4 h-auto lg:h-20 gap-4 lg:rounded-xl">
-          {/* Desktop Tabs */}
-          <div className="hidden lg:flex ">
-            <Tabs
-              value={selectedCategory}
-              onValueChange={handleCategoryChange}
-              className="w-[400px] h-full gap-0 "
-            >
-              <TabsList className="gap-4">
+        <h3 className="p-4 text-2xl font-bold text-brown-600">
+          Latest articles
+        </h3>
+
+        {/* Toolbar: Category & Search */}
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center bg-brown-200 p-4 gap-4 lg:rounded-xl">
+          {/* Desktop Category Tabs */}
+          <div className="hidden lg:flex">
+            <Tabs value={selectedCategory} onValueChange={handleCategoryChange}>
+              <TabsList className="bg-transparent gap-2">
                 {categories.map((category) => (
                   <TabsTrigger
-                    value={category}
-                    className="body-1 text-brown-400"
                     key={category}
+                    value={category}
+                    className="text-brown-400 data-[state=active]:text-brown-600 data-[state=active]:font-bold transition-all cursor-pointer"
                   >
                     {category}
                   </TabsTrigger>
@@ -78,85 +146,127 @@ function ArticleSection() {
             </Tabs>
           </div>
 
-          {/* Search Input */}
-          <div>
-            <InputGroup className="bg-white h-12 w-full lg:w-[320px] ">
+          {/* Search Box & Dropdown */}
+          <div className="relative w-full lg:w-[350px]" ref={searchRef}>
+            <InputGroup className="bg-white h-12 rounded-lg border border-brown-300 shadow-sm overflow-hidden focus-within:ring-2 focus-within:ring-brown-300">
               <InputGroupInput
-                placeholder="Search"
-                className="body-1 text-brown-400"
+                placeholder="Search..."
+                className="text-brown-600 border-none focus-visible:ring-0"
                 value={searchText}
-                onChange={handleSearchChange}
+                onChange={(e) => setSearchText(e.target.value)}
+                onFocus={() => searchText.length > 0 && setShowDropdown(true)}
               />
-              <InputGroupAddon align="inline-end">
-                <Search className="w-4 h-4" />
+              <InputGroupAddon align="inline-end" className="pr-3">
+                <Search className="w-4 h-4 text-brown-400" />
               </InputGroupAddon>
             </InputGroup>
+
+            {/* Quick Search Dropdown */}
+            {showDropdown && searchText && blogPosts.length > 0 && (
+              <div className="absolute top-14 left-0 w-full bg-white rounded-xl shadow-2xl z-100 border border-brown-200 overflow-hidden max-h-[300px] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+                {blogPosts.slice(0, 5).map((post) => (
+                  <Link
+                    key={`drop-${post.id}`}
+                    to={`/post/${post.id}`}
+                    onClick={() => {
+                      setShowDropdown(false);
+                      setSearchText("");
+                    }}
+                    className="flex items-center gap-3 p-3 hover:bg-brown-50 border-b border-gray-100 last:border-none group"
+                  >
+                    <img
+                      src={post.image}
+                      alt=""
+                      className="w-10 h-10 rounded-md object-cover shrink-0"
+                    />
+                    <div className="flex flex-col overflow-hidden text-left">
+                      <p className="text-sm font-bold text-brown-600 truncate">
+                        {post.title}
+                      </p>
+                      <p className="text-[11px] text-brown-400 truncate">
+                        {post.category}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Mobile Select */}
+          {/* Mobile Category Select */}
           <div className="lg:hidden flex flex-col gap-1">
-            <Label className="body-1 text-brown-400">Category</Label>
+            <Label className="text-brown-400 text-xs ml-1">Category</Label>
             <Select
               value={selectedCategory}
               onValueChange={handleCategoryChange}
             >
-              <SelectTrigger className="w-full h-12! bg-white body-1 text-brown-400">
-                <SelectValue placeholder="Select Category" />
+              <SelectTrigger className="w-full h-12! bg-white text-brown-600 border border-brown-300 rounded-lg shadow-sm focus:ring-2 focus:ring-brown-300 focus:outline-none">
+                <SelectValue placeholder="Select category" />
               </SelectTrigger>
-              <SelectContent position="popper" sideOffset={0}>
-                <SelectGroup>
-                  {categories.map((category) => (
-                    <SelectItem
-                      value={category}
-                      className="body-1 text-brown-400"
-                      key={category}
-                    >
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
+              <SelectContent
+                position="popper"
+                className="bg-white border border-brown-300 rounded-lg shadow-lg"
+              >
+                {categories.map((category) => (
+                  <SelectItem
+                    key={category}
+                    value={category}
+                    className="text-brown-600 hover:bg-brown-100 focus:bg-brown-100 focus:text-brown-700 cursor-pointer transition-colors"
+                  >
+                    {category}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
         </div>
       </section>
 
-      {/* Blog Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:pt-14 md:px-28">
-        {filteredPosts.length > 0 ? (
-          filteredPosts
-            .slice(0, visibleCount)
-            .map((post) => (
-              <BlogCard
-                key={post.id}
-                image={post.image}
-                category={post.category}
-                title={post.title}
-                description={post.description}
-                author={post.author}
-                authorImage={post.authorImage}
-                date={post.date}
-              />
-            ))
+      {/* Main Blog Post Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:px-28 min-h-[400px]">
+        {loading ? (
+          <div className="col-span-full flex flex-col items-center justify-center py-20 gap-4">
+            <Spinner className="h-12 w-12 text-brown-600" />
+            <p className="text-brown-400 animate-pulse font-medium">
+              Finding articles...
+            </p>
+          </div>
+        ) : blogPosts.length > 0 ? (
+          blogPosts.map((post) => <BlogCard key={post.id} {...post} />)
         ) : (
-          <div className="col-span-2 text-center py-10 text-brown-400">
-            No articles found.
+          <div className="col-span-full text-center py-32 text-brown-400">
+            <Search className="w-12 h-12 mx-auto opacity-10 mb-4" />
+            <p className="text-xl font-bold">
+              No results found for "{searchText}"
+            </p>
+            <p className="text-sm opacity-70 mt-2">
+              Try a different category or search term.
+            </p>
           </div>
         )}
       </div>
 
-      {filteredPosts.length > visibleCount && (
-        <div className="flex justify-center pt-8 pb-28">
+      {/* Pagination: View More Button */}
+      {!loading && hasMore && blogPosts.length > 0 && (
+        <div className="flex justify-center pt-8 pb-32">
           <Button
-            variant="link"
-            onClick={handleViewMore}
-            className="bg-white font body-1 text-brown-600"
+            variant="outline"
+            onClick={handleLoadMore}
+            disabled={isMoreLoading}
+            className="border-2 border-brown-600 text-brown-600 hover:bg-brown-600 hover:text-white px-12 h-14 rounded-full font-bold transition-all shadow-md flex items-center gap-3 active:scale-95 cursor-pointer"
           >
-            View More
+            {isMoreLoading ? (
+              <>
+                <Spinner className="h-4 w-4" />
+                <span>Loading...</span>
+              </>
+            ) : (
+              "View More"
+            )}
           </Button>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
