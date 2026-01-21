@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { Search } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react"; // 1. เพิ่ม useCallback
+import { Search, X } from "lucide-react";
 import axios from "axios";
 import {
   InputGroup,
@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -37,8 +36,10 @@ function ArticleSection() {
   const [showDropdown, setShowDropdown] = useState(false);
   const searchRef = useRef(null);
 
-  // --- Data Fetching ---
-  const fetchData = async (currentPage, isNewSearch = false) => {
+  // --- Data Fetching (Wrapped with useCallback) ---
+  // การใช้ useCallback ช่วยให้ฟังก์ชันไม่ถูกสร้างใหม่ทุกครั้งที่ render 
+  // เว้นแต่ selectedCategory หรือ searchText จะเปลี่ยน
+  const fetchData = useCallback(async (currentPage, isNewSearch = false) => {
     if (isNewSearch) {
       setLoading(true);
     } else {
@@ -63,7 +64,6 @@ function ArticleSection() {
 
       if (isNewSearch) {
         setBlogPosts(newPosts);
-        // เปิด dropdown เฉพาะเมื่อมีการพิมพ์ค้นหา
         if (searchText.trim().length > 0) {
           setShowDropdown(true);
         }
@@ -71,7 +71,6 @@ function ArticleSection() {
         setBlogPosts((prev) => [...prev, ...newPosts]);
       }
 
-      // ตรวจสอบว่ามีหน้าต่อไปไหม
       setHasMore(response.data.currentPage < response.data.totalPages);
     } catch (error) {
       console.error("Fetch Error:", error);
@@ -79,26 +78,26 @@ function ArticleSection() {
       setLoading(false);
       setIsMoreLoading(false);
     }
-  };
+  }, [selectedCategory, searchText]); // Dependencies สำหรับ fetchData
 
-  // 1. จัดการการค้นหาและเปลี่ยนหมวดหมู่ (Reset ไปหน้า 1 เสมอ)
+  // 1. จัดการการค้นหาและเปลี่ยนหมวดหมู่ (Debounce)
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       setPage(1);
       fetchData(1, true);
-    }, 200); // 400ms กำลังดีสำหรับการพิมพ์
+    }, 200);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [selectedCategory, searchText]);
+  }, [fetchData]); // ใส่ fetchData เป็น dependency ได้อย่างปลอดภัย
 
-  // 2. จัดการเมื่อกด "View More" (โหลดหน้าถัดไป)
+  // 2. จัดการเมื่อกด "View More"
   useEffect(() => {
     if (page > 1) {
       fetchData(page, false);
     }
-  }, [page]);
+  }, [page, fetchData]); // เพิ่ม fetchData ตามกฎ ESLint
 
-  // 3. ปิด Dropdown เมื่อคลิกนอกพื้นที่ช่องค้นหา
+  // 3. ปิด Dropdown เมื่อคลิกนอกพื้นที่
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -121,7 +120,7 @@ function ArticleSection() {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full font-poppins">
       <section className="flex flex-col h-auto md:px-32 md:py-20">
         <h3 className="p-4 text-2xl font-bold text-brown-600">
           Latest articles
@@ -163,7 +162,7 @@ function ArticleSection() {
 
             {/* Quick Search Dropdown */}
             {showDropdown && searchText && blogPosts.length > 0 && (
-              <div className="absolute top-14 left-0 w-full bg-white rounded-xl shadow-2xl z-100 border border-brown-200 overflow-hidden max-h-[300px] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+              <div className="absolute top-14 left-0 w-full bg-white rounded-xl shadow-2xl z-50 border border-brown-200 overflow-hidden max-h-[300px] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
                 {blogPosts.slice(0, 5).map((post) => (
                   <Link
                     key={`drop-${post.id}`}
@@ -200,18 +199,15 @@ function ArticleSection() {
               value={selectedCategory}
               onValueChange={handleCategoryChange}
             >
-              <SelectTrigger className="w-full h-12! bg-white text-brown-600 border border-brown-300 rounded-lg shadow-sm focus:ring-2 focus:ring-brown-300 focus:outline-none">
+              <SelectTrigger className="w-full h-12! bg-white text-brown-600 border border-brown-300 rounded-lg shadow-sm focus:ring-2 focus:ring-brown-300 focus:outline-none cursor-pointer">
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
-              <SelectContent
-                position="popper"
-                className="bg-white border border-brown-300 rounded-lg shadow-lg"
-              >
+              <SelectContent className="bg-white border border-brown-300 rounded-lg shadow-lg" position="popper">
                 {categories.map((category) => (
                   <SelectItem
                     key={category}
                     value={category}
-                    className="text-brown-600 hover:bg-brown-100 focus:bg-brown-100 focus:text-brown-700 cursor-pointer transition-colors"
+                    className="text-brown-600 hover:bg-brown-100 focus:bg-brown-100 cursor-pointer transition-colors"
                   >
                     {category}
                   </SelectItem>
@@ -236,7 +232,7 @@ function ArticleSection() {
         ) : (
           <div className="col-span-full text-center py-32 text-brown-400">
             <Search className="w-12 h-12 mx-auto opacity-10 mb-4" />
-            <p className="text-xl font-bold">
+            <p className="text-xl font-bold text-brown-600">
               No results found for "{searchText}"
             </p>
             <p className="text-sm opacity-70 mt-2">
