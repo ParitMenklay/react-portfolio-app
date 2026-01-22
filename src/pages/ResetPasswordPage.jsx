@@ -55,7 +55,8 @@ const ResetPasswordPage = () => {
 
   const validateForm = () => {
     let newErrors = {};
-    if (!passwords.currentPassword) newErrors.currentPassword = "Current password is required";
+    if (!passwords.currentPassword)
+      newErrors.currentPassword = "Current password is required";
     if (!passwords.newPassword) {
       newErrors.newPassword = "New password is required";
     } else if (passwords.newPassword.length < 8) {
@@ -81,10 +82,17 @@ const ResetPasswordPage = () => {
       toast.custom((t) => (
         <div className="flex items-start justify-between w-full max-w-[400px] bg-[#10B981] text-white p-4 rounded-xl shadow-lg animate-in fade-in slide-in-from-top-2 duration-300 font-poppins border-none">
           <div className="flex flex-col gap-1 text-left">
-            <h3 className="text-xl font-bold leading-tight text-white">Password Updated</h3>
-            <p className="text-sm opacity-90 font-medium text-white">Your security settings have been updated successfully.</p>
+            <h3 className="text-xl font-bold leading-tight text-white">
+              Password Updated
+            </h3>
+            <p className="text-sm opacity-90 font-medium text-white">
+              Your security settings have been updated successfully.
+            </p>
           </div>
-          <button onClick={() => toast.dismiss(t)} className="p-1 hover:bg-white/20 rounded-full transition-colors cursor-pointer text-white">
+          <button
+            onClick={() => toast.dismiss(t)}
+            className="p-1 hover:bg-white/20 rounded-full transition-colors cursor-pointer text-white"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -100,7 +108,9 @@ const ResetPasswordPage = () => {
     return (
       <div className="min-h-screen bg-[#F3F3F3] flex flex-col items-center justify-center gap-4 animate-in fade-in duration-300">
         <Spinner className="h-12 w-12 text-brown-600" />
-        <p className="text-brown-400 animate-pulse font-medium font-poppins">Processing...</p>
+        <p className="text-brown-400 animate-pulse font-medium font-poppins">
+          Processing...
+        </p>
       </div>
     );
   }
@@ -110,7 +120,7 @@ const ResetPasswordPage = () => {
       {/* Header Navigation */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between lg:justify-start lg:gap-12">
-          <div 
+          <div
             onClick={() => handleNavigate("/profile")}
             className="flex items-center gap-2 cursor-pointer text-brown-400 hover:text-brown-600 transition-colors font-medium text-base group"
           >
@@ -127,14 +137,16 @@ const ResetPasswordPage = () => {
       {/* Page Title Area */}
       <div className="bg-white border-b border-gray-100 px-6 py-6">
         <div className="max-w-4xl mx-auto flex items-center gap-4">
-          <img 
-            src="https://placehold.co/40x40/D2691E/white?text=MD" 
-            alt="Avatar" 
+          <img
+            src="https://placehold.co/40x40/D2691E/white?text=MD"
+            alt="Avatar"
             className="w-12 h-12 rounded-full object-cover border border-gray-200 cursor-pointer"
             onClick={() => handleNavigate("/profile")}
           />
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-bold text-brown-500 truncate max-w-[120px]">Moodeng ja</h2>
+            <h2 className="text-xl font-bold text-brown-500 truncate max-w-[120px]">
+              Moodeng ja
+            </h2>
             <div className="h-6 w-px bg-gray-300 mx-1"></div>
             <h2 className="text-xl font-bold text-brown-600">Reset password</h2>
           </div>
@@ -144,38 +156,50 @@ const ResetPasswordPage = () => {
       {/* Main Form Area */}
       <div className="max-w-md mx-auto px-6 py-12">
         <div className="w-full space-y-6">
-          {["currentPassword", "newPassword", "confirmPassword"].map((field) => (
-            <div key={field} className="space-y-2">
-              <Label className="text-brown-400 text-base font-medium ml-1 capitalize">
-                {field.replace(/([A-Z])/g, ' $1')}
-              </Label>
-              <div className="relative">
-                <Input
-                  type={showPasswords[field] ? "text" : "password"}
-                  name={field}
-                  placeholder={field.replace(/([A-Z])/g, ' $1')}
-                  value={passwords[field]}
-                  onChange={handleChange}
-                  className={`h-14 rounded-2xl border-none bg-white shadow-sm focus-visible:ring-1 pr-14 ${
-                    errors[field] ? "ring-1 ring-red" : "focus-visible:ring-brown-300"
-                  } text-brown-600 text-lg px-6`}
-                />
-                {/* ปุ่มเปิด-ปิดตา */}
-                <button
-                  type="button"
-                  onClick={() => toggleVisibility(field)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-brown-400 hover:text-brown-600 transition-colors cursor-pointer p-1"
-                >
-                  {showPasswords[field] ? <EyeOff size={22} /> : <Eye size={22} />}
-                </button>
+          {["currentPassword", "newPassword", "confirmPassword"].map(
+            (field) => (
+              <div key={field} className="space-y-2">
+                <Label className="text-brown-400 text-base font-medium ml-1 capitalize">
+                  {field.replace(/([A-Z])/g, " $1")}
+                </Label>
+                <div className="relative">
+                  <Input
+                    type={showPasswords[field] ? "text" : "password"}
+                    name={field}
+                    placeholder={field.replace(/([A-Z])/g, " $1")}
+                    value={passwords[field]}
+                    onChange={handleChange}
+                    className={`h-14 rounded-2xl border-none bg-white shadow-sm focus-visible:ring-1 pr-14 ${
+                      errors[field]
+                        ? "ring-1 ring-red"
+                        : "focus-visible:ring-brown-300"
+                    } text-brown-600 text-lg px-6`}
+                  />
+                  {/* ปุ่มเปิด-ปิดตา */}
+                  <button
+                    type="button"
+                    onClick={() => toggleVisibility(field)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-brown-400 hover:text-brown-600 transition-colors cursor-pointer p-1"
+                  >
+                    {showPasswords[field] ? (
+                      <EyeOff size={22} />
+                    ) : (
+                      <Eye size={22} />
+                    )}
+                  </button>
+                </div>
+                {errors[field] && (
+                  <p className="text-red text-sm ml-1 font-medium">
+                    {errors[field]}
+                  </p>
+                )}
               </div>
-              {errors[field] && <p className="text-red text-sm ml-1 font-medium">{errors[field]}</p>}
-            </div>
-          ))}
+            )
+          )}
 
           <div className="pt-4 flex justify-center md:justify-start">
-            <Button 
-              onClick={handleOpenDialog} 
+            <Button
+              onClick={handleOpenDialog}
               className="w-full md:w-auto md:px-12 h-14 rounded-full bg-[#231F20] hover:bg-black text-white text-lg font-bold shadow-lg transition-all active:scale-95 cursor-pointer"
             >
               Reset password
@@ -193,12 +217,23 @@ const ResetPasswordPage = () => {
             </AlertDialogCancel>
           </div>
           <AlertDialogHeader className="space-y-4">
-            <AlertDialogTitle className="text-center text-2xl font-bold text-[#231F20]">Reset password</AlertDialogTitle>
-            <AlertDialogDescription className="text-center text-base text-gray-500 font-medium">Do you want to reset your password?</AlertDialogDescription>
+            <AlertDialogTitle className="text-center text-2xl font-bold text-[#231F20]">
+              Reset password
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-base text-gray-500 font-medium">
+              Do you want to reset your password?
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-center gap-4 mt-2">
-            <AlertDialogCancel className="h-14 w-full sm:w-32 rounded-full border border-gray-200 text-lg font-bold hover:bg-gray-50 cursor-pointer">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleReset} className="h-14 w-full sm:w-32 rounded-full bg-[#231F20] hover:bg-black text-white text-lg font-bold cursor-pointer">Reset</AlertDialogAction>
+            <AlertDialogCancel className="h-14 w-full sm:w-32 rounded-full border border-gray-200 text-lg font-bold hover:bg-gray-50 cursor-pointer">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleReset}
+              className="h-14 w-full sm:w-32 rounded-full bg-[#231F20] hover:bg-black text-white text-lg font-bold cursor-pointer"
+            >
+              Reset
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

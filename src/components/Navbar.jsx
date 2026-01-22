@@ -36,7 +36,7 @@ export function Navbar() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // --- เพิ่ม State สำหรับควบคุมการเปิด-ปิด Dropdown ---
+  // State สำหรับควบคุมการเปิด-ปิด Dropdown
   const [isNotiOpen, setIsNotiOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -47,7 +47,6 @@ export function Navbar() {
       setUser(JSON.parse(userData));
     }
 
-    // --- ฟังก์ชันสำหรับปิด Dropdown เมื่อมีการ Resize หน้าจอ ---
     const handleResize = () => {
       setIsNotiOpen(false);
       setIsProfileOpen(false);
@@ -60,7 +59,6 @@ export function Navbar() {
 
   const handleNavigate = async (path) => {
     setLoading(true);
-    // ปิดเมนูทันทีเมื่อเปลี่ยนหน้า
     setIsMobileMenuOpen(false);
     setIsProfileOpen(false);
     setIsNotiOpen(false);
@@ -82,9 +80,9 @@ export function Navbar() {
   return (
     <>
       {loading && (
-        <div className="fixed inset-0 z-[100] bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center gap-4 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center gap-4 animate-in fade-in duration-300 font-poppins">
           <Spinner className="h-12 w-12 text-brown-600" />
-          <p className="text-brown-600 font-bold font-poppins animate-pulse">
+          <p className="text-brown-600 font-bold animate-pulse">
             Processing...
           </p>
         </div>
@@ -143,7 +141,7 @@ export function Navbar() {
                       </div>
                     </DropdownMenuItem>
                   ))}
-                  <div className="p-2 text-center">
+                  <div className="p-2 text-center border-t border-brown-50">
                     <button className="text-xs font-bold text-brown-400 hover:text-brown-600 cursor-pointer">
                       View all notifications
                     </button>
@@ -162,7 +160,7 @@ export function Navbar() {
                     <img
                       src={userAvatar}
                       alt="profile"
-                      className="w-12 h-12 rounded-full object-cover border-2 border-brown-300"
+                      className="w-12 h-12 rounded-full object-cover border-2 border-brown-300 shadow-sm"
                     />
                     <span className="font-semibold text-brown-600">
                       {user.name || "Moodeng ja"}
@@ -180,6 +178,7 @@ export function Navbar() {
                     <User className="w-5 h-5 text-brown-400" />
                     <span className="text-brown-600 font-medium">Profile</span>
                   </DropdownMenuItem>
+
                   <DropdownMenuItem
                     onClick={() => handleNavigate("/reset-password")}
                     className="flex items-center gap-3 p-3 cursor-pointer focus:bg-brown-50 rounded-xl"
@@ -189,6 +188,20 @@ export function Navbar() {
                       Reset password
                     </span>
                   </DropdownMenuItem>
+
+                  {/* แสดง Admin Panel หาก User เป็น Admin */}
+                  {user.role === "admin" && (
+                    <DropdownMenuItem
+                      onClick={() => handleNavigate("/admin")}
+                      className="flex items-center gap-3 p-3 cursor-pointer focus:bg-brown-50 rounded-xl"
+                    >
+                      <KeyRound className="w-5 h-5 text-brown-400" />
+                      <span className="text-brown-600 font-medium">
+                        Admin panel
+                      </span>
+                    </DropdownMenuItem>
+                  )}
+
                   <DropdownMenuSeparator className="bg-brown-100 my-2" />
                   <DropdownMenuItem
                     onClick={handleLogout}
@@ -205,14 +218,13 @@ export function Navbar() {
               <Button
                 onClick={() => handleNavigate("/login")}
                 variant="secondary"
-                className="bg-white h-12 w-32 rounded-full border border-brown-400 text-brown-600 hover:bg-brown-50 font-semibold active:scale-95 cursor-pointer"
+                className="bg-white h-12 w-32 rounded-full border border-brown-400 text-brown-600 hover:bg-brown-50 font-semibold active:scale-95 cursor-pointer shadow-sm"
               >
                 Log in
               </Button>
               <Button
                 onClick={() => handleNavigate("/signup")}
-                variant="default"
-                className="h-12 w-32 rounded-full border border-brown-600 bg-brown-600 hover:opacity-90 text-white font-semibold shadow-sm active:scale-95 cursor-pointer"
+                className="h-12 w-32 rounded-full bg-brown-600 hover:bg-brown-700 text-white font-semibold shadow-sm active:scale-95 cursor-pointer"
               >
                 Sign up
               </Button>
@@ -253,20 +265,36 @@ export function Navbar() {
                       <span className="font-semibold text-brown-600">
                         {user.name}
                       </span>
-                    
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="rounded-full bg-white border border-brown-200 h-10 w-10 shadow-sm cursor-pointer">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="rounded-full bg-white border border-brown-200 h-10 w-10 shadow-sm cursor-pointer"
+                        >
                           <Bell className="w-5 h-5 text-brown-500" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-[calc(100vw-3rem)] mt-2 rounded-2xl p-2 bg-white">
+                      <DropdownMenuContent
+                        align="end"
+                        className="w-[calc(100vw-3rem)] mt-2 rounded-2xl p-2 bg-white"
+                      >
                         {notifications.map((noti) => (
-                          <DropdownMenuItem key={noti.id} className="flex gap-3 p-3 focus:bg-brown-50 rounded-xl">
-                            <img src={noti.avatar} className="w-8 h-8 rounded-full" />
+                          <DropdownMenuItem
+                            key={noti.id}
+                            className="flex gap-3 p-3 focus:bg-brown-50 rounded-xl"
+                          >
+                            <img
+                              src={noti.avatar}
+                              className="w-8 h-8 rounded-full"
+                              alt=""
+                            />
                             <div className="text-xs">
-                              <p><span className="font-bold">{noti.user}</span> {noti.action}</p>
+                              <p>
+                                <span className="font-bold">{noti.user}</span>{" "}
+                                {noti.action}
+                              </p>
                               <p className="text-orange">{noti.time}</p>
                             </div>
                           </DropdownMenuItem>
@@ -274,6 +302,7 @@ export function Navbar() {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
+
                   <DropdownMenuItem
                     onClick={() => handleNavigate("/profile")}
                     className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-brown-50 cursor-pointer"
@@ -283,6 +312,7 @@ export function Navbar() {
                       Profile
                     </span>
                   </DropdownMenuItem>
+
                   <DropdownMenuItem
                     onClick={() => handleNavigate("/reset-password")}
                     className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-brown-50 cursor-pointer"
@@ -292,6 +322,20 @@ export function Navbar() {
                       Reset password
                     </span>
                   </DropdownMenuItem>
+
+                  {/* Mobile Admin Panel */}
+                  {user.role === "admin" && (
+                    <DropdownMenuItem
+                      onClick={() => handleNavigate("/admin")}
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-brown-50 cursor-pointer"
+                    >
+                      <KeyRound className="w-5 h-5 text-brown-500" />
+                      <span className="text-brown-600 font-semibold">
+                        Admin panel
+                      </span>
+                    </DropdownMenuItem>
+                  )}
+
                   <div className="border-t border-brown-300 my-2"></div>
                   <DropdownMenuItem
                     onClick={handleLogout}
@@ -305,13 +349,13 @@ export function Navbar() {
                 <div className="flex flex-col gap-4 px-4 py-2">
                   <Button
                     onClick={() => handleNavigate("/login")}
-                    className="w-full bg-white h-12 rounded-full border border-brown-400 text-brown-600 font-semibold cursor-pointer active:scale-95"
+                    className="w-full bg-white h-12 rounded-full border border-brown-400 text-brown-600 font-semibold cursor-pointer active:scale-95 shadow-sm"
                   >
                     Log in
                   </Button>
                   <Button
                     onClick={() => handleNavigate("/signup")}
-                    className="w-full h-12 rounded-full bg-brown-600 text-white font-semibold cursor-pointer active:scale-95"
+                    className="w-full h-12 rounded-full bg-brown-600 text-white font-semibold cursor-pointer active:scale-95 shadow-sm"
                   >
                     Sign up
                   </Button>
@@ -330,57 +374,73 @@ export function Footer() {
   const [loading, setLoading] = useState(false);
 
   const handleFooterNavigate = async (path) => {
+    // 1. เริ่มแสดง Loading
     setLoading(true);
+
+    // 2. เลื่อนหน้าจอขึ้นไปข้างบนแบบนุ่มนวล (Optional: ถ้าจะเปลี่ยนหน้าเลย อาจจะไม่ต้องรอก็ได้)
     window.scrollTo({ top: 0, behavior: "smooth" });
+
+    // 3. รอให้ Spinner แสดงผลครู่หนึ่งเพื่อให้ User ทราบว่ากำลังประมวลผล
     await new Promise((resolve) => setTimeout(resolve, 800));
+
+    // 4. เปลี่ยนหน้า
     navigate(path);
+
+    // 5. ปิด Loading (ในกรณีที่หน้าปลายทางโหลดเสร็จ)
     setLoading(false);
   };
 
   return (
-    <footer className="bg-brown-200 border-t border-brown-300 flex flex-col md:flex-row justify-center md:justify-between items-center w-full h-auto px-4 md:px-32 py-10 md:py-16 gap-6 font-poppins relative">
+    <>
+      {/* ปรับ Spinner เป็น fixed และ z-index สูงๆ ให้เหมือน Navbar */}
       {loading && (
-        <div className="absolute inset-0 z-50 bg-brown-200/60 backdrop-blur-sm flex items-center justify-center animate-in fade-in">
-          <Spinner className="h-8 w-8 text-brown-600" />
+        <div className="fixed inset-0 z-[100] bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center gap-4 animate-in fade-in duration-300 font-poppins">
+          <Spinner className="h-12 w-12 text-brown-600" />
+          <p className="text-brown-600 font-bold animate-pulse">
+            Navigating...
+          </p>
         </div>
       )}
 
-      <div className="flex flex-row items-center gap-6">
-        <span className="text-brown-500 text-sm">Get in touch</span>
-        <div className="flex gap-4">
-          <a
-            href="#"
-            className="text-brown-600 hover:text-brown-400 transition-colors cursor-pointer"
-          >
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-            </svg>
-          </a>
-          <a
-            href="#"
-            className="text-brown-600 hover:text-brown-400 transition-colors cursor-pointer"
-          >
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-            </svg>
-          </a>
-          <a
-            href="mailto:contact@example.com"
-            className="text-brown-600 hover:text-brown-400 transition-colors cursor-pointer active:scale-90"
-          >
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 7.188l3.824 3.099 3.83-3.104 5.612 6.817h-18.779l5.513-6.812zm9.208-1.264l4.616-3.741v9.348l-4.616-5.607z" />
-            </svg>
-          </a>
+      <footer className="bg-brown-200 border-t border-brown-300 flex flex-col md:flex-row justify-center md:justify-between items-center w-full h-auto px-4 md:px-32 py-10 md:py-16 gap-6 font-poppins relative">
+        <div className="flex flex-row items-center gap-6">
+          <span className="text-brown-500 text-sm">Get in touch</span>
+          <div className="flex gap-4">
+            {/* Social Icons - เพิ่ม cursor-pointer และ active state */}
+            <a
+              href="#"
+              className="text-brown-600 hover:text-brown-400 transition-colors cursor-pointer active:scale-90"
+            >
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+              </svg>
+            </a>
+            <a
+              href="#"
+              className="text-brown-600 hover:text-brown-400 transition-colors cursor-pointer active:scale-90"
+            >
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+              </svg>
+            </a>
+            <a
+              href="mailto:contact@example.com"
+              className="text-brown-600 hover:text-brown-400 transition-colors cursor-pointer active:scale-90"
+            >
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 7.188l3.824 3.099 3.83-3.104 5.612 6.817h-18.779l5.513-6.812zm9.208-1.264l4.616-3.741v9.348l-4.616-5.607z" />
+              </svg>
+            </a>
+          </div>
         </div>
-      </div>
 
-      <div
-        onClick={() => handleFooterNavigate("/")}
-        className="text-brown-600 hover:text-brown-400 transition-colors underline-offset-4 hover:underline font-bold font-poppins cursor-pointer text-sm"
-      >
-        Home Page
-      </div>
-    </footer>
+        <div
+          onClick={() => handleFooterNavigate("/")}
+          className="text-brown-600 hover:text-brown-400 transition-all active:scale-95 underline-offset-4 hover:underline font-bold font-poppins cursor-pointer text-sm"
+        >
+          Home Page
+        </div>
+      </footer>
+    </>
   );
 }
