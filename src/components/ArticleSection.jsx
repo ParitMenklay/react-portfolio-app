@@ -37,48 +37,52 @@ function ArticleSection() {
   const searchRef = useRef(null);
 
   // --- Data Fetching (Wrapped with useCallback) ---
-  // การใช้ useCallback ช่วยให้ฟังก์ชันไม่ถูกสร้างใหม่ทุกครั้งที่ render 
+  // การใช้ useCallback ช่วยให้ฟังก์ชันไม่ถูกสร้างใหม่ทุกครั้งที่ render
   // เว้นแต่ selectedCategory หรือ searchText จะเปลี่ยน
-  const fetchData = useCallback(async (currentPage, isNewSearch = false) => {
-    if (isNewSearch) {
-      setLoading(true);
-    } else {
-      setIsMoreLoading(true);
-    }
-
-    try {
-      const categoryParam = selectedCategory === "All" ? "" : selectedCategory;
-      const response = await axios.get(
-        `https://blog-post-project-api.vercel.app/posts`,
-        {
-          params: {
-            page: currentPage,
-            limit: 6,
-            category: categoryParam,
-            keyword: searchText,
-          },
-        }
-      );
-
-      const newPosts = response.data.posts;
-
+  const fetchData = useCallback(
+    async (currentPage, isNewSearch = false) => {
       if (isNewSearch) {
-        setBlogPosts(newPosts);
-        if (searchText.trim().length > 0) {
-          setShowDropdown(true);
-        }
+        setLoading(true);
       } else {
-        setBlogPosts((prev) => [...prev, ...newPosts]);
+        setIsMoreLoading(true);
       }
 
-      setHasMore(response.data.currentPage < response.data.totalPages);
-    } catch (error) {
-      console.error("Fetch Error:", error);
-    } finally {
-      setLoading(false);
-      setIsMoreLoading(false);
-    }
-  }, [selectedCategory, searchText]); // Dependencies สำหรับ fetchData
+      try {
+        const categoryParam =
+          selectedCategory === "All" ? "" : selectedCategory;
+        const response = await axios.get(
+          `https://blog-post-project-api.vercel.app/posts`,
+          {
+            params: {
+              page: currentPage,
+              limit: 6,
+              category: categoryParam,
+              keyword: searchText,
+            },
+          }
+        );
+
+        const newPosts = response.data.posts;
+
+        if (isNewSearch) {
+          setBlogPosts(newPosts);
+          if (searchText.trim().length > 0) {
+            setShowDropdown(true);
+          }
+        } else {
+          setBlogPosts((prev) => [...prev, ...newPosts]);
+        }
+
+        setHasMore(response.data.currentPage < response.data.totalPages);
+      } catch (error) {
+        console.error("Fetch Error:", error);
+      } finally {
+        setLoading(false);
+        setIsMoreLoading(false);
+      }
+    },
+    [selectedCategory, searchText]
+  ); // Dependencies สำหรับ fetchData
 
   // 1. จัดการการค้นหาและเปลี่ยนหมวดหมู่ (Debounce)
   useEffect(() => {
@@ -202,7 +206,10 @@ function ArticleSection() {
               <SelectTrigger className="w-full h-12! bg-white text-brown-600 border border-brown-300 rounded-lg shadow-sm focus:ring-2 focus:ring-brown-300 focus:outline-none cursor-pointer">
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
-              <SelectContent className="bg-white border border-brown-300 rounded-lg shadow-lg" position="popper">
+              <SelectContent
+                className="bg-white border border-brown-300 rounded-lg shadow-lg"
+                position="popper"
+              >
                 {categories.map((category) => (
                   <SelectItem
                     key={category}

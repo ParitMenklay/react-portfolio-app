@@ -31,7 +31,7 @@ function SignUpPage() {
 
     if (!formData.name.trim()) newErrors.name = "Name is required";
     if (!formData.username.trim()) newErrors.username = "Username is required";
-    
+
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!emailRegex.test(formData.email)) {
@@ -71,10 +71,12 @@ function SignUpPage() {
           <div className="w-24 h-24 bg-green rounded-full flex items-center justify-center mb-8 shadow-inner">
             <Check className="text-white w-12 h-12" />
           </div>
-          
-          <h2 className="text-brown-600 mb-10 text-3xl font-bold">Registration success</h2>
 
-          <Button 
+          <h2 className="text-brown-600 mb-10 text-3xl font-bold">
+            Registration success
+          </h2>
+
+          <Button
             onClick={handleContinue}
             className="w-full max-w-[240px] h-[56px] bg-brown-600 hover:opacity-90 text-white rounded-full font-bold shadow-lg body-1 cursor-pointer active:scale-95 transition-all"
           >
@@ -89,18 +91,22 @@ function SignUpPage() {
     <>
       {/* --- Spinner Overlay --- */}
       {loading && (
-        <div className="fixed inset-0 z-[100] bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center gap-4 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-100 bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center gap-4 animate-in fade-in duration-300">
           <Spinner className="h-12 w-12 text-brown-600" />
-          <p className="text-brown-600 font-bold font-poppins animate-pulse">Creating your account...</p>
+          <p className="text-brown-600 font-bold font-poppins animate-pulse">
+            Creating your account...
+          </p>
         </div>
       )}
 
       <div className="min-h-screen w-full bg-brown-100 flex items-center justify-center p-4 font-poppins">
         <div className="bg-brown-200 w-full max-w-[480px] p-10 rounded-[40px] flex flex-col items-center shadow-sm border border-brown-300">
-          
           <h2 className="text-brown-600 mb-10 text-3xl font-bold">Sign up</h2>
 
-          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-5 text-left">
+          <form
+            onSubmit={handleSubmit}
+            className="w-full flex flex-col gap-5 text-left"
+          >
             {/* Name */}
             <div className="flex flex-col gap-1.5 w-full">
               <Label className="body-2 text-brown-500 ml-1">Name</Label>
@@ -110,10 +116,14 @@ function SignUpPage() {
                 value={formData.name}
                 onChange={handleChange}
                 className={`h-[54px] bg-white border-none rounded-xl px-4 body-1 shadow-sm transition-all focus-visible:ring-1 ${
-                  errors.name ? "ring-1 ring-red" : "focus-visible:ring-brown-300"
+                  errors.name
+                    ? "ring-1 ring-red"
+                    : "focus-visible:ring-brown-300"
                 }`}
               />
-              {errors.name && <span className="text-red body-3 ml-1">{errors.name}</span>}
+              {errors.name && (
+                <span className="text-red body-3 ml-1">{errors.name}</span>
+              )}
             </div>
 
             {/* Username */}
@@ -125,10 +135,14 @@ function SignUpPage() {
                 value={formData.username}
                 onChange={handleChange}
                 className={`h-[54px] bg-white border-none rounded-xl px-4 body-1 shadow-sm transition-all focus-visible:ring-1 ${
-                  errors.username ? "ring-1 ring-red" : "focus-visible:ring-brown-300"
+                  errors.username
+                    ? "ring-1 ring-red"
+                    : "focus-visible:ring-brown-300"
                 }`}
               />
-              {errors.username && <span className="text-red body-3 ml-1">{errors.username}</span>}
+              {errors.username && (
+                <span className="text-red body-3 ml-1">{errors.username}</span>
+              )}
             </div>
 
             {/* Email */}
@@ -140,10 +154,14 @@ function SignUpPage() {
                 value={formData.email}
                 onChange={handleChange}
                 className={`h-[54px] bg-white border-none rounded-xl px-4 body-1 shadow-sm transition-all focus-visible:ring-1 ${
-                  errors.email ? "ring-1 ring-red" : "focus-visible:ring-brown-300"
+                  errors.email
+                    ? "ring-1 ring-red"
+                    : "focus-visible:ring-brown-300"
                 }`}
               />
-              {errors.email && <span className="text-red body-3 ml-1">{errors.email}</span>}
+              {errors.email && (
+                <span className="text-red body-3 ml-1">{errors.email}</span>
+              )}
             </div>
 
             {/* Password */}
@@ -157,7 +175,9 @@ function SignUpPage() {
                   value={formData.password}
                   onChange={handleChange}
                   className={`h-[54px] bg-white border-none rounded-xl px-4 pr-12 body-1 shadow-sm transition-all focus-visible:ring-1 ${
-                    errors.password ? "ring-1 ring-red" : "focus-visible:ring-brown-300"
+                    errors.password
+                      ? "ring-1 ring-red"
+                      : "focus-visible:ring-brown-300"
                   }`}
                 />
                 <button
@@ -168,7 +188,9 @@ function SignUpPage() {
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              {errors.password && <span className="text-red body-3 ml-1">{errors.password}</span>}
+              {errors.password && (
+                <span className="text-red body-3 ml-1">{errors.password}</span>
+              )}
             </div>
 
             <div className="flex justify-center mt-6">
@@ -182,8 +204,13 @@ function SignUpPage() {
           </form>
 
           <div className="mt-12 body-2 text-brown-400 flex gap-2">
-            Already have an account? 
-            <Link to="/login" className="text-brown-600 font-bold underline cursor-pointer">Log in</Link>
+            Already have an account?
+            <Link
+              to="/login"
+              className="text-brown-600 font-bold underline cursor-pointer"
+            >
+              Log in
+            </Link>
           </div>
         </div>
       </div>

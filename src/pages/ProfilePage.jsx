@@ -37,24 +37,22 @@ const ProfilePage = () => {
     await new Promise((resolve) => setTimeout(resolve, 1200));
 
     try {
-      toast.custom(
-        (t) => (
-          <div className="flex items-start justify-between w-full max-w-[400px] bg-[#10B981] text-white p-4 rounded-xl shadow-lg animate-in fade-in slide-in-from-top-2 duration-300 font-poppins">
-            <div className="flex flex-col gap-1 text-left">
-              <h3 className="text-xl font-bold leading-tight">Saved profile</h3>
-              <p className="text-sm opacity-90 font-medium">
-                Your profile has been successfully updated
-              </p>
-            </div>
-            <button
-              onClick={() => toast.dismiss(t)}
-              className="p-1 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
+      toast.custom((t) => (
+        <div className="flex items-start justify-between w-full max-w-[400px] bg-[#10B981] text-white p-4 rounded-xl shadow-lg animate-in fade-in slide-in-from-top-2 duration-300 font-poppins">
+          <div className="flex flex-col gap-1 text-left">
+            <h3 className="text-xl font-bold leading-tight">Saved profile</h3>
+            <p className="text-sm opacity-90 font-medium">
+              Your profile has been successfully updated
+            </p>
           </div>
-        )
-      );
+          <button
+            onClick={() => toast.dismiss(t)}
+            className="p-1 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      ));
     } catch (error) {
       toast.error("Failed to update profile");
     } finally {
@@ -136,7 +134,10 @@ const ProfilePage = () => {
         {/* Form Section */}
         <div className="w-full space-y-8">
           <div className="space-y-3">
-            <Label htmlFor="name" className="text-brown-400 text-base font-medium ml-1">
+            <Label
+              htmlFor="name"
+              className="text-brown-400 text-base font-medium ml-1"
+            >
               Name
             </Label>
             <Input
@@ -149,7 +150,10 @@ const ProfilePage = () => {
           </div>
 
           <div className="space-y-3">
-            <Label htmlFor="username" className="text-brown-400 text-base font-medium ml-1">
+            <Label
+              htmlFor="username"
+              className="text-brown-400 text-base font-medium ml-1"
+            >
               Username
             </Label>
             <Input
