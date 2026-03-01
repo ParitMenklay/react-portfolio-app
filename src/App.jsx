@@ -27,6 +27,27 @@ import CategoryFormPage from "./pages/Admin/CategoryFormPage";
 import AdminProfilePage from "./pages/Admin/AdminProfilePage";
 import NotificationPage from "./pages/Admin/NotificationPage";
 import AdminResetPasswordPage from "./pages/Admin/AdminResetPasswordPage";
+import { AuthProvider, useAuth } from "./contexts/AuthContext"; // เพิ่ม
+import { Spinner } from "@/components/ui/spinner"; // เพิ่ม
+
+// แก้ ProtectedAdminRoute ให้ใช้ context แทน localStorage โดยตรง
+const ProtectedAdminRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Spinner className="h-12 w-12 text-brown-600" />
+      </div>
+    );
+  }
+
+  if (!user || user.role !== "admin") {
+    return <Navigate to="/admin/login" replace />;
+  }
+
+  return children;
+};
 
 // --- Layout Definitions ---
 
@@ -49,23 +70,12 @@ const AuthLayout = () => (
   </main>
 );
 
-// --- Guard Components ---
-
-// Component สำหรับเช็คสิทธิ์ Admin ก่อนเข้าถึงหน้า Dashboard
-const ProtectedAdminRoute = ({ children }) => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  // ตรวจสอบว่ามี User ในระบบและมี Role เป็น admin หรือไม่
-  if (!user || user.role !== "admin") {
-    return <Navigate to="/admin/login" replace />;
-  }
-  return children;
-};
-
 // --- Main App Component ---
 
 export default function App() {
   return (
     <BrowserRouter>
+    <AuthProvider>
       {/* Toast Configuration: รองรับ Custom Toast bg-green/bg-red ที่คุณต้องการ */}
       <Toaster
         position="bottom-right"
@@ -108,7 +118,7 @@ export default function App() {
           <Route path="edit/:id" element={<ArticleFormPage />} />
           <Route path="category" element={<CategoryManagementPage />} />
           <Route path="category/create" element={<CategoryFormPage />} />
-          <Route path="category/edit/:name" element={<CategoryFormPage />} />
+          <Route path="category/edit/:id" element={<CategoryFormPage />} />
           <Route path="profile" element={<AdminProfilePage />} />
           <Route path="notification" element={<NotificationPage />} />
           <Route path="reset-password" element={<AdminResetPasswordPage />} />
@@ -117,6 +127,7 @@ export default function App() {
         {/* กลุ่มที่ 4: กรณีไม่พบหน้า (404) */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

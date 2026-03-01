@@ -2,94 +2,120 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { X, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
+import axios from "axios"; // เพิ่ม axios
 
 // shadcn/ui components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Spinner } from "@/components/ui/spinner"; // มั่นใจว่ามี component นี้ใน project นะครับ
+import { Spinner } from "@/components/ui/spinner";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function CategoryFormPage() {
   const navigate = useNavigate();
-  const { name: categoryName } = useParams(); // รับค่าจาก path="category/edit/:name"
-  const isEditMode = Boolean(categoryName);
+  const { id } = useParams(); // รับ id จาก URL path เช่น /admin/category/edit/:id
+  const isEditMode = Boolean(id);
 
   const [name, setName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(false);
 
-  // ถ้าเป็นโหมด Edit ให้ดึงชื่อเดิมมาใส่ใน Input
+  // --- 1. ดึงข้อมูลเดิมมาแสดง (กรณี Edit Mode) ---
   useEffect(() => {
-    if (isEditMode && categoryName) {
-      setName(decodeURIComponent(categoryName));
+    if (isEditMode) {
+      const fetchCategory = async () => {
+        setIsLoadingData(true);
+        try {
+          const response = await axios.get(`${API_BASE_URL}/categories/${id}`);
+          // data.data ตามโครงสร้างที่คุณเขียนใน Backend
+          setName(response.data?.data?.name || "");
+        } catch (error) {
+          console.error(error);
+          toast.error("Category not found");
+          navigate("/admin/category");
+        } finally {
+          setIsLoadingData(false);
+        }
+      };
+      fetchCategory();
     }
-  }, [isEditMode, categoryName]);
+  }, [id, isEditMode, navigate]);
 
   const handleSave = async () => {
-    // --- แก้ไขส่วนเช็คค่าว่างใน handleSave ---
     if (!name.trim()) {
-      toast.custom(
-        (t) => (
-          <div className="bg-red text-white p-5 rounded-2xl shadow-lg flex justify-between items-start w-[380px] animate-in slide-in-from-right-5 font-poppins border border-white/10">
-            <div className="flex flex-col gap-1">
-              <h3 className="text-xl font-bold">Error!</h3>
-              <p className="text-white/90 text-sm">
-                Please enter a category name before saving.
-              </p>
-            </div>
-            <button
-              onClick={() => toast.dismiss(t)}
-              className="cursor-pointer hover:bg-white/20 p-1 rounded-full transition-colors shrink-0"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        ),
-        { duration: 3000 }
-      );
+      toast.error("Please enter a category name");
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // จำลองการเชื่อมต่อ API เหมือนในหน้า ArticleForm
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const token = localStorage.getItem("token");
+      const config = {
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+      };
 
-      // Toast สไตล์ที่คุณต้องการ (ใช้สีเขียวสำหรับ Success)
+      if (isEditMode) {
+        // --- 2. UPDATE Category (PUT) ---
+        await axios.put(
+          `${API_BASE_URL}/categories/${id}`,
+          { name: name.trim() },
+          config
+        );
+      } else {
+        // --- 3. CREATE Category (POST) ---
+        await axios.post(
+          `${API_BASE_URL}/categories`,
+          { name: name.trim() },
+          config
+        );
+      }
+
+      // Success Toast สไตล์ที่คุณต้องการ
       toast.custom(
         (t) => (
-          <div className="bg-green text-white p-5 rounded-2xl shadow-lg flex justify-between items-start w-[380px] animate-in slide-in-from-right-5 font-poppins border border-white/10">
+          <div className="bg-green text-white p-5 rounded-2xl shadow-lg flex justify-between items-start w-[380px] animate-in slide-in-from-right-5 font-poppins">
             <div className="flex flex-col gap-1">
               <h3 className="text-xl font-bold">
                 {isEditMode ? "Category Updated" : "Success!"}
               </h3>
               <p className="text-white/90 text-sm">
-                Category has been {isEditMode ? "updated" : "created"}{" "}
-                successfully.
+                Category has been {isEditMode ? "updated" : "created"} successfully.
               </p>
             </div>
-            <button
-              onClick={() => toast.dismiss(t)}
-              className="cursor-pointer hover:bg-white/20 p-1 rounded-full transition-colors"
-            >
+            <button onClick={() => toast.dismiss(t)} className="cursor-pointer">
               <X className="w-5 h-5" />
             </button>
           </div>
         ),
-        { duration: 3000 }
+        { duration: 2000 }
       );
 
-      navigate("/admin/category");
+      setTimeout(() => navigate("/admin/category"), 500);
     } catch (error) {
-      toast.error("Something went wrong");
+      console.error(error);
+      const message = error.response?.data?.message || "Something went wrong";
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // แสดงหน้าโหลดขณะดึงข้อมูลเดิม
+  if (isLoadingData) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center">
+        <Spinner className="w-8 h-8 text-black" />
+      </div>
+    );
+  }
+
   return (
     <div className="p-10 font-poppins min-h-screen max-w-5xl mx-auto">
-      {/* Header Area เหมือนสไตล์ ArticleForm */}
+      {/* Header Area */}
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-4">
           <Button
@@ -105,7 +131,6 @@ export default function CategoryFormPage() {
           </h2>
         </div>
 
-        {/* ปุ่ม Save สไตล์เดียวกับ ArticleForm */}
         <Button
           onClick={handleSave}
           disabled={isSubmitting}
@@ -133,11 +158,12 @@ export default function CategoryFormPage() {
             Category name
           </label>
           <Input
-            placeholder="Category name"
+            placeholder="e.g. Technology, Lifestyle"
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={isSubmitting}
-            className="h-12 bg-white border-gray-200 rounded-xl focus-visible:ring-1 focus-visible:ring-gray-300 text-lg shadow-sm disabled:opacity-50"
+            onKeyDown={(e) => e.key === "Enter" && handleSave()} // กด Enter เพื่อ Save
+            className="h-12 bg-white border-gray-200 rounded-xl focus-visible:ring-1 focus-visible:ring-gray-300 text-lg shadow-sm"
           />
         </div>
       </div>

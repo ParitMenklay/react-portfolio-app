@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Search, Plus, Pencil, Trash2, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import axios from "axios"; // เพิ่ม axios
 
 // shadcn/ui components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator"; // เพิ่ม Separator ให้เหมือนหน้า Article
+import { Separator } from "@/components/ui/separator";
+import { Spinner } from "@/components/ui/spinner"; // สมมติว่าคุณมี Spinner
 import {
   Table,
   TableBody,
@@ -27,44 +29,57 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-// --- Static Categories ---
-const CATEGORIES = ["Highlight", "Cat", "Inspiration", "General"];
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function CategoryManagementPage() {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [searchText, setSearchText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  // --- Initialize Categories ---
+  // --- 1. Fetch Categories จาก API ---
+  const fetchCategories = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`${API_BASE_URL}/categories`);
+      // ตรวจสอบโครงสร้างข้อมูล (data.data ตามที่คุณเขียนไว้ใน API)
+      setCategories(response.data?.data || []);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load categories");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const initialCategories = CATEGORIES.map((name, index) => ({
-      id: index + 1,
-      name: name,
-    }));
-    setCategories(initialCategories);
+    fetchCategories();
   }, []);
 
+  // --- 2. Filter ข้อมูล ---
   const filteredCategories = categories.filter((cat) =>
     cat.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  const handleDelete = async (name) => {
+  // --- 3. Handle Delete ผ่าน API ---
+  const handleDelete = async (id) => {
     try {
-      setCategories((prev) => prev.filter((cat) => cat.name !== name));
+      const token = localStorage.getItem("token");
+      await axios.delete(`${API_BASE_URL}/categories/${id}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      // ลบออกจาก State เพื่ออัปเดต UI ทันที
+      setCategories((prev) => prev.filter((cat) => cat.id !== id));
 
       toast.custom(
         (t) => (
-          <div className="bg-red text-white p-5 rounded-2xl shadow-lg flex justify-between items-start w-[380px] animate-in slide-in-from-right-5 font-poppins border border-white/10">
+          <div className="bg-green text-white p-5 rounded-2xl shadow-lg flex justify-between items-start w-[380px] animate-in slide-in-from-right-5 font-poppins border border-white/10">
             <div className="flex flex-col gap-1">
               <h3 className="text-xl font-bold">Deleted!</h3>
-              <p className="text-white/90 text-sm">
-                Category has been removed.
-              </p>
+              <p className="text-white/90 text-sm">Category has been removed.</p>
             </div>
-            <button
-              onClick={() => toast.dismiss(t)}
-              className="cursor-pointer hover:bg-white/20 p-1 rounded-full transition-colors shrink-0"
-            >
+            <button onClick={() => toast.dismiss(t)} className="cursor-pointer">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -72,17 +87,16 @@ export default function CategoryManagementPage() {
         { duration: 3000 }
       );
     } catch (error) {
-      toast.error("Delete failed");
+      console.error(error);
+      toast.error(error.response?.data?.message || "Delete failed");
     }
   };
 
   return (
     <div className="p-10 font-poppins min-h-screen">
-      {/* Header Area - ปรับ font size 2xl และปุ่ม h-12 เหมือน Article */}
+      {/* Header Area */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-[#231F20]">
-          Category management
-        </h2>
+        <h2 className="text-2xl font-bold text-[#231F20]">Category management</h2>
         <Button
           onClick={() => navigate("/admin/category/create")}
           className="bg-[#231F20] hover:bg-black text-white rounded-full px-6 h-12 cursor-pointer flex gap-2 font-bold transition-all active:scale-95 shadow-md"
@@ -93,27 +107,24 @@ export default function CategoryManagementPage() {
 
       <Separator className="mb-8" />
 
-      {/* Search Bar - ปรับความกว้าง w-80 และความสูง h-11 เหมือน Article */}
+      {/* Search Bar */}
       <div className="relative w-80 mb-8">
-        <Search
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-          size={18}
-        />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
         <Input
           placeholder="Search..."
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          className="pl-10 h-11 bg-white border-gray-200 rounded-xl focus-visible:ring-1 focus-visible:ring-gray-300 shadow-sm"
+          className="pl-10 h-11 bg-white border-gray-200 rounded-xl shadow-sm"
         />
       </div>
 
-      {/* Table Area - ปรับ padding p-5 และขนาด font text-gray-700 font-medium */}
+      {/* Table Area */}
       <div className="bg-white rounded-[20px] border border-gray-100 shadow-sm overflow-hidden min-h-[400px]">
         <Table>
           <TableHeader className="bg-[#FDFDFD]">
             <TableRow className="hover:bg-transparent border-gray-50">
               <TableHead className="p-5 font-bold text-gray-400 uppercase text-[10px] tracking-widest">
-                Category
+                Category Name
               </TableHead>
               <TableHead className="text-right p-5 font-bold text-gray-400 uppercase text-[10px] tracking-widest">
                 Action
@@ -121,28 +132,29 @@ export default function CategoryManagementPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredCategories.length > 0 ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={2} className="h-64 text-center">
+                  <Spinner className="inline-block" />
+                </TableCell>
+              </TableRow>
+            ) : filteredCategories.length > 0 ? (
               filteredCategories.map((item) => (
-                <TableRow
-                  key={item.name}
-                  className="hover:bg-gray-50/50 border-gray-50 transition-colors"
-                >
-                  <TableCell className="p-5 text-gray-700 font-medium">
-                    {item.name}
-                  </TableCell>
+                <TableRow key={item.id} className="hover:bg-gray-50/50 border-gray-50 transition-colors">
+                  <TableCell className="p-5 text-gray-700 font-medium">{item.name}</TableCell>
                   <TableCell className="p-5 text-right">
                     <div className="flex justify-end gap-1">
+                      {/* ปุ่ม Edit ใช้ ID */}
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() =>
-                          navigate(`/admin/category/edit/${item.name}`)
-                        }
+                        onClick={() => navigate(`/admin/category/edit/${item.id}`)}
                         className="text-gray-400 hover:text-black rounded-full cursor-pointer h-10 w-10"
                       >
                         <Pencil size={18} />
                       </Button>
 
+                      {/* AlertDialog สำหรับ Delete */}
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button
@@ -153,27 +165,18 @@ export default function CategoryManagementPage() {
                             <Trash2 size={18} />
                           </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="rounded-[32px] border-none max-w-[440px] p-8 shadow-2xl">
-                          <div className="absolute right-6 top-6">
-                            <AlertDialogCancel className="border-none p-0 h-auto hover:bg-transparent cursor-pointer">
-                              <X className="w-6 h-6 text-gray-400" />
-                            </AlertDialogCancel>
-                          </div>
-                          <AlertDialogHeader className="flex flex-col items-center gap-4">
-                            <AlertDialogTitle className="text-[28px] font-bold text-[#231F20] mt-4">
-                              Delete category
-                            </AlertDialogTitle>
-                            <AlertDialogDescription className="text-gray-500 text-lg text-center font-medium">
-                              Do you want to delete this category?
+                        <AlertDialogContent className="rounded-[32px] p-8">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="text-center text-[28px]">Delete category</AlertDialogTitle>
+                            <AlertDialogDescription className="text-center text-lg">
+                              Do you want to delete "{item.name}"?
                             </AlertDialogDescription>
                           </AlertDialogHeader>
-                          <AlertDialogFooter className="flex flex-row justify-center gap-4 mt-8 sm:justify-center">
-                            <AlertDialogCancel className="flex-1 h-14 rounded-full border border-gray-300 text-lg font-bold text-[#231F20] hover:bg-gray-50 cursor-pointer transition-all active:scale-95">
-                              Cancel
-                            </AlertDialogCancel>
+                          <AlertDialogFooter className="flex justify-center gap-4 mt-8">
+                            <AlertDialogCancel className="flex-1 rounded-full h-14 font-bold">Cancel</AlertDialogCancel>
                             <AlertDialogAction
-                              onClick={() => handleDelete(item.name)}
-                              className="flex-1 h-14 bg-[#231F20] hover:bg-black text-white rounded-full text-lg font-bold cursor-pointer transition-all active:scale-95 shadow-md"
+                              onClick={() => handleDelete(item.id)} // ส่ง ID ไปลบ
+                              className="flex-1 rounded-full h-14 bg-[#231F20] font-bold"
                             >
                               Delete
                             </AlertDialogAction>
@@ -186,13 +189,8 @@ export default function CategoryManagementPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={2}
-                  className="h-64 text-center text-gray-400"
-                >
-                  {searchText
-                    ? `No categories found matching "${searchText}"`
-                    : "No categories available"}
+                <TableCell colSpan={2} className="h-64 text-center text-gray-400">
+                  No categories found.
                 </TableCell>
               </TableRow>
             )}

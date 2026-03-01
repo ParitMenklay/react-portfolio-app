@@ -1,4 +1,4 @@
-import React, { useState } from "react"; // เพิ่ม useState
+import React, { useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   FileText,
@@ -8,7 +8,6 @@ import {
   Key,
   ExternalLink,
   LogOut,
-  ChevronRight,
 } from "lucide-react";
 
 import {
@@ -23,15 +22,17 @@ import {
   SidebarTrigger,
   SidebarInset,
 } from "@/components/ui/sidebar";
-import { Spinner } from "@/components/ui/spinner"; // นำเข้า Spinner
+import { Spinner } from "@/components/ui/spinner";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [isNavigatingHome, setIsNavigatingHome] = useState(false); // State สำหรับปุ่ม Home
+  const { logout } = useAuth();
+  const [isNavigatingHome, setIsNavigatingHome] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
+    logout(); // ลบ token + user จาก localStorage และอัปเดต state
     navigate("/admin/login");
   };
 
@@ -57,7 +58,7 @@ export default function AdminLayout() {
     <SidebarProvider>
       {/* Overlay Spinner เมื่อกำลังกลับหน้า Home */}
       {isNavigatingHome && (
-        <div className="fixed inset-0 z-[100] bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center gap-4 animate-in fade-in duration-300 font-poppins">
+        <div className="fixed inset-0 z-100 bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center gap-4 animate-in fade-in duration-300 font-poppins">
           <Spinner className="h-12 w-12 text-brown-600" />
           <p className="text-brown-600 font-bold animate-pulse text-sm">
             Returning to Website...
@@ -74,8 +75,8 @@ export default function AdminLayout() {
         >
           <SidebarHeader className="p-6">
             <div className="flex flex-col gap-1">
-              <h1 className="text-3xl font-bold tracking-tight">
-                hh<span className="text-green-500 text-brown-600">.</span>
+              <h1 className="text-3xl font-bold tracking-tight text-brown-600">
+                hh<span className="text-green ">.</span>
               </h1>
               <p className="text-orange-300 text-[10px] font-bold uppercase tracking-[0.2em]">
                 Admin panel
@@ -119,7 +120,7 @@ export default function AdminLayout() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={handleLogout}
-                  className="cursor-pointer text-gray-500 hover:text-red-500 transition-colors transition-all active:scale-95"
+                  className="cursor-pointer text-gray-500 hover:text-red-500 transition-all active:scale-95"
                 >
                   <LogOut className="size-5" />
                   <span className="text-sm">Log out</span>
