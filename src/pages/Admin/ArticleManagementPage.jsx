@@ -45,12 +45,13 @@ import {
 } from "@/components/ui/alert-dialog";
 
 // --- Configuration ---
-const CATEGORIES = ["All", "Highlight", "Cat", "Inspiration", "General"];
-const STATUS_OPTIONS = ["All", "Published", "Draft"];
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function ArticleManagementPage() {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [categoryOptions, setCategoryOptions] = useState(["All"]);
+  const [statusOptions, setStatusOptions] = useState(["All"]);
   const navigate = useNavigate();
 
   // --- Filter & Pagination States ---
@@ -60,19 +61,60 @@ export default function ArticleManagementPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  // --- Fetch filter options (categories & statuses) from API ---
+  useEffect(() => {
+    const fetchFilterOptions = async () => {
+      try {
+        const [categoriesResponse, statusesResponse] = await Promise.all([
+          axios.get(`${API_BASE_URL}/categories`),
+          axios.get(`${API_BASE_URL}/statuses`),
+        ]);
+
+        const rawCategories =
+          categoriesResponse.data?.data || categoriesResponse.data || [];
+        const rawStatuses =
+          statusesResponse.data?.data || statusesResponse.data || [];
+
+        const categories = Array.isArray(rawCategories)
+          ? rawCategories
+              .map((item) => (typeof item === "string" ? item : item.name))
+              .filter(Boolean)
+          : [];
+
+        const statuses = Array.isArray(rawStatuses)
+          ? rawStatuses
+              .map((item) =>
+                typeof item === "string" ? item : item.status || item.name
+              )
+              .filter(Boolean)
+          : [];
+
+        setCategoryOptions(["All", ...categories]);
+        setStatusOptions(["All", ...statuses]);
+      } catch (error) {
+        console.error("Failed to load filter options:", error);
+        toast.error("Failed to load filter options");
+      }
+    };
+
+    fetchFilterOptions();
+  }, []);
+
   // --- Fetch Data Function ---
   const fetchArticles = useCallback(async () => {
     setLoading(true);
     try {
       const categoryParam = selectedCategory === "All" ? "" : selectedCategory;
+      const statusParam = selectedStatus === "All" ? "" : selectedStatus;
       const response = await axios.get(
-        `https://blog-post-project-api.vercel.app/posts`,
+        `${API_BASE_URL}/posts`,
         {
           params: {
             page: page,
             limit: 6,
             category: categoryParam,
             keyword: searchText,
+            status: statusParam,
           },
         }
       );
@@ -84,7 +126,7 @@ export default function ArticleManagementPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, selectedCategory, searchText]);
+  }, [page, selectedCategory, selectedStatus, searchText]);
 
   // รวม useEffect เป็นตัวเดียวเพื่อป้องกัน double loading
   useEffect(() => {
@@ -105,12 +147,17 @@ export default function ArticleManagementPage() {
 
   const handleDelete = async (id) => {
     try {
-      // ตัวอย่าง: await axios.delete(`.../posts/${id}`)
+      const token = localStorage.getItem("token");
+      await axios.delete(`${API_BASE_URL}/posts/${id}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
       setArticles(articles.filter((a) => a.id !== id));
+      setPage(1);
 
       toast.custom(
         (t) => (
-          <div className="bg-red text-white p-5 rounded-2xl shadow-lg flex justify-between items-start w-[380px] animate-in slide-in-from-right-5 font-poppins">
+          <div className="bg-green text-white p-5 rounded-2xl shadow-lg flex justify-between items-start w-[380px] animate-in slide-in-from-right-5 font-poppins">
             <div className="flex flex-col gap-1">
               <h3 className="text-xl font-bold">Deleted!</h3>
               <p className="text-white/90 text-sm">
@@ -128,7 +175,10 @@ export default function ArticleManagementPage() {
         { duration: 3000 }
       );
     } catch (error) {
-      toast.error("Delete failed");
+      console.error("Delete failed:", error);
+      toast.error(
+        error.response?.data?.message || "Delete failed"
+      );
     }
   };
 
@@ -170,7 +220,7 @@ export default function ArticleManagementPage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="rounded-xl" position="popper">
-              {STATUS_OPTIONS.map((status) => (
+              {statusOptions.map((status) => (
                 <SelectItem
                   key={status}
                   value={status}
@@ -188,7 +238,7 @@ export default function ArticleManagementPage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="rounded-xl" position="popper">
-              {CATEGORIES.map((cat) => (
+              {categoryOptions.map((cat) => (
                 <SelectItem key={cat} value={cat} className="cursor-pointer">
                   {cat}
                 </SelectItem>
@@ -242,9 +292,21 @@ export default function ArticleManagementPage() {
                     </span>
                   </TableCell>
                   <TableCell className="p-5">
-                    <div className="flex items-center gap-2 text-green text-sm font-bold">
-                      <span className="w-2 h-2 bg-green rounded-full"></span>
-                      Published
+                    <div
+                      className={`flex items-center gap-2 text-sm font-bold ${
+                        String(item.status).toLowerCase() === "draft"
+                          ? "text-orange"
+                          : "text-green"
+                      }`}
+                    >
+                      <span
+                        className={`w-2 h-2 rounded-full ${
+                          String(item.status).toLowerCase() === "draft"
+                            ? "bg-orange"
+                            : "bg-green"
+                        }`}
+                      />
+                      {item.status}
                     </div>
                   </TableCell>
                   <TableCell className="p-5 text-right">

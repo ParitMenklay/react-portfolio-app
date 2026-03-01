@@ -116,7 +116,7 @@ const ResetPasswordPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F3F3F3] font-poppins">
+    <div className="min-h-[calc(100vh-80px)] bg-[#F3F3F3] font-poppins">
       {/* Header Navigation */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between lg:justify-start lg:gap-12">

@@ -1,15 +1,19 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Check } from "lucide-react";
-import { Spinner } from "@/components/ui/spinner"; // นำเข้า Spinner
+import { Eye, EyeOff, Check, X } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function SignUpPage() {
   const navigate = useNavigate();
   const [isSuccess, setIsSuccess] = useState(false);
-  const [loading, setLoading] = useState(false); // เพิ่ม State สำหรับ Loading
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -18,6 +22,20 @@ function SignUpPage() {
     password: "",
   });
   const [errors, setErrors] = useState({});
+
+  const showErrorToast = (title, message) => {
+    toast.custom((t) => (
+      <div className="bg-red text-white p-5 rounded-2xl shadow-lg flex justify-between items-start w-full max-w-[400px] relative animate-in slide-in-from-right-5 font-poppins">
+        <div className="flex flex-col gap-1">
+          <h3 className="text-xl font-bold">{title}</h3>
+          <p className="text-white/90 text-sm">{message}</p>
+        </div>
+        <button type="button" onClick={() => toast.dismiss(t)} className="cursor-pointer">
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+    ), { duration: 4000 });
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -50,12 +68,23 @@ function SignUpPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      setLoading(true); // เริ่ม Loading
-      // จำลองการเชื่อมต่อ API 1.2 วินาที
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      setLoading(false); // ปิด Loading
+    if (!validateForm()) return;
+
+    setLoading(true);
+    try {
+      await axios.post(`${API_BASE_URL}/auth/register`, {
+        email: formData.email.trim(),
+        password: formData.password,
+        username: formData.username.trim(),
+        name: formData.name.trim(),
+      });
       setIsSuccess(true);
+    } catch (err) {
+      const message =
+        err.response?.data?.error || err.message || "Registration failed. Please try again.";
+      showErrorToast("Registration failed", message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -99,9 +128,9 @@ function SignUpPage() {
         </div>
       )}
 
-      <div className="min-h-screen w-full bg-brown-100 flex items-center justify-center p-4 font-poppins">
+      <div className="min-h-[calc(100vh-80px)] w-full bg-brown-100 flex items-center justify-center p-4 font-poppins">
         <div className="bg-brown-200 w-full max-w-[480px] p-10 rounded-[40px] flex flex-col items-center shadow-sm border border-brown-300">
-          <h2 className="text-brown-600 mb-10 text-3xl font-bold">Sign up</h2>
+          <h2 className="text-brown-600 mb-10 text-5xl font-bold">Sign up</h2>
 
           <form
             onSubmit={handleSubmit}
