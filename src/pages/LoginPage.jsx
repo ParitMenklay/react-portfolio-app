@@ -1,37 +1,25 @@
 import React, { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom"; // เพิ่ม useLocation
+import { Link, useLocation } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, X } from "lucide-react";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
+import axios from "axios"; // หรือใช้ fetch ก็ได้
+import { useAuth } from "@/contexts/AuthContext";
 
-// ข้อมูลจำลองสำหรับทั้ง User และ Admin
-const MOCK_USERS = [
-  {
-    email: "moodeng.cute@gmail.com",
-    password: "password123",
-    name: "Moodeng ja",
-    role: "user",
-  },
-  {
-    email: "admin@blog.com",
-    password: "adminpassword",
-    name: "System Admin",
-    role: "admin",
-  },
-];
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function LoginPage() {
-  const navigate = useNavigate();
-  const location = useLocation(); // ใช้เช็ค Path ปัจจุบัน
+  
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
+  const { login } = useAuth(); 
 
-  // ตรวจสอบว่าเป็นหน้า Admin หรือไม่
   const isAdminPage = location.pathname.includes("admin");
 
   const handleChange = (e) => {
@@ -57,93 +45,71 @@ function LoginPage() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const showErrorToast = (title, message) => {
+    toast.custom((t) => (
+      <div className="bg-red text-white p-5 rounded-2xl shadow-lg flex justify-between items-start w-full max-w-[400px] relative animate-in slide-in-from-right-5 font-poppins">
+        <div className="flex flex-col gap-1">
+          <h3 className="text-xl font-bold">{title}</h3>
+          <p className="text-white/90 text-sm">{message}</p>
+        </div>
+        <button onClick={() => toast.dismiss(t)} className="cursor-pointer">
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+    ), { duration: 4000 });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
+  
+    setLoading(true);
+    try {
+      // Step 1: Login → รับ access_token
+      const { data: loginData } = await axios.post(`${API_BASE_URL}/auth/login`, {
+        email: formData.email,
+        password: formData.password,
+      });
 
-    if (validateForm()) {
-      setLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const { data: userData } = await axios.get(`${API_BASE_URL}/auth/get-user`, {
+        headers: { Authorization: `Bearer ${loginData.access_token}` },
+      });
 
-      const foundUser = MOCK_USERS.find(
-        (u) => u.email === formData.email && u.password === formData.password
-      );
-
-      if (foundUser) {
-        // ตรวจสอบสิทธิ์: ถ้าพยายาม Login หน้า Admin แต่ไม่ใช่ Admin จริงๆ
-        if (isAdminPage && foundUser.role !== "admin") {
-          setLoading(false);
-          toast.custom(
-            (t) => (
-              <div className="bg-red text-white p-5 rounded-2xl shadow-lg flex justify-between items-start w-full max-w-[400px] relative animate-in slide-in-from-right-5 font-poppins">
-                <div className="flex flex-col gap-1">
-                  <h3 className="text-xl font-bold">Access Denied!</h3>
-                  <p className="text-white/90 text-sm">
-                    You do not have permission to access the Admin Panel.
-                  </p>
-                </div>
-                <button
-                  onClick={() => toast.dismiss(t)}
-                  className="cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            ),
-            { duration: 4000 }
-          );
-          return;
-        }
-
-        localStorage.setItem("user", JSON.stringify(foundUser));
-
-        toast.custom(
-          (t) => (
-            <div className="bg-green text-white p-5 rounded-2xl shadow-lg flex justify-between items-start w-full max-w-[400px] relative animate-in slide-in-from-right-5 font-poppins">
-              <div className="flex flex-col gap-1">
-                <h3 className="text-xl font-bold">Login Successful!</h3>
-                <p className="text-white/90 text-sm">
-                  Welcome, {foundUser.name}!{" "}
-                  {isAdminPage ? "Accessing Admin Panel..." : "Redirecting..."}
-                </p>
-              </div>
-              <button
-                onClick={() => toast.dismiss(t)}
-                className="cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          ),
-          { duration: 2000 }
-        );
-
-        setTimeout(() => {
-          window.location.href = foundUser.role === "admin" ? "/admin" : "/";
-        }, 1500);
-      } else {
-        setLoading(false);
-        toast.custom(
-          (t) => (
-            <div className="bg-red text-white p-5 rounded-2xl shadow-lg flex justify-between items-start w-full max-w-[400px] relative animate-in slide-in-from-right-5 font-poppins">
-              <div className="flex flex-col gap-1">
-                <h3 className="text-xl font-bold">Login Failed!</h3>
-                <p className="text-white/90 text-sm">
-                  Incorrect email or password.
-                </p>
-              </div>
-              <button
-                onClick={() => toast.dismiss(t)}
-                className="cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          ),
-          { duration: 4000 }
-        );
+      if (isAdminPage && userData.role !== "admin") {
+        showErrorToast("Access Denied!", "You do not have permission to access the Admin Panel.");
+        return;
       }
+
+      login(loginData.access_token, userData);
+
+      toast.custom((t) => (
+        <div className="bg-green text-white p-5 rounded-2xl shadow-lg flex justify-between items-start w-full max-w-[400px] relative animate-in slide-in-from-right-5 font-poppins">
+          <div className="flex flex-col gap-1">
+            <h3 className="text-xl font-bold">Login Successful!</h3>
+            <p className="text-white/90 text-sm">
+              Welcome, {userData.name}!{" "}
+              {isAdminPage ? "Accessing Admin Panel..." : "Redirecting..."}
+            </p>
+          </div>
+          <button onClick={() => toast.dismiss(t)} className="cursor-pointer">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      ), { duration: 2000 });
+
+      setTimeout(() => {
+        window.location.href = userData.role === "admin" ? "/admin" : "/";
+      }, 1500);
+
+    } catch (error) {
+      const message =
+        error.response?.data?.error || "Something went wrong. Please try again.";
+      showErrorToast("Login Failed!", message);
+    } finally {
+      setLoading(false);
     }
   };
+
 
   return (
     <>
@@ -158,7 +124,7 @@ function LoginPage() {
 
       {/* พื้นหลัง: Admin = เทาอ่อน (#EEEFEF), User = น้ำตาลอ่อน */}
       <div
-        className={`min-h-screen w-full flex items-center justify-center p-4 font-poppins transition-colors ${
+        className={`min-h-[calc(100vh-80px)] w-full flex items-center justify-center p-4 font-poppins transition-colors ${
           isAdminPage ? "bg-[#EEEFEF]" : "bg-brown-100"
         }`}
       >
